@@ -1,14 +1,32 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import QULogo from './assets/qu-logo.png'
+// import './App.css'
+import { Container, Nav, Navbar, NavbarBrand, NavLink, Row } from 'react-bootstrap'
+import { CourseCard } from './components/CourseCard'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
+    <Navbar>
+      <NavbarBrand href="#home">
+        <img src="./assets/react.svg"/>
+      </NavbarBrand>
+      <NavLink>Log out</NavLink>
+    </Navbar>
+    <Container style={{
+      display: "flex",
+      width: "1280px",
+      flexDirection: "row",
+      flexWrap: "wrap"
+    }}>
+        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} />
+        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} />
+        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} />
+        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} />
+    </Container>
+      {/* <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -27,7 +45,7 @@ function App() {
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
-      </p>
+      </p> */}
     </>
   )
 }
