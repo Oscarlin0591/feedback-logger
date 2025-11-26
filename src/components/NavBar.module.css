@@ -1,0 +1,20 @@
+.NavBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.NavLink {
+    background-color: rgb(120, 120, 120);
+    padding: 8px;
+    color: black;
+    text-decoration: underline;
+}
+
+.NavBrand {
+    color: black
+}
+
+.logo {
+    margin: 16px;
+}
