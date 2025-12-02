@@ -25,7 +25,7 @@ const sampleStudents: Feedback[] = [
 ]
 
 const sampleStudentOwn: Feedback[] = [
-{ id: 'me', name: 'Feedback 1', comment: 'I think this lesson is too hard'}
+{ id: '1', name: 'Feedback 1', comment: 'I think this lesson is too hard'}
 ]
 
 const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
@@ -33,10 +33,11 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   const [show, setShow] = useState(false);
   const [editShow, setEditShow] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>({
-    id: 'me', name: `Feedback ${sampleStudentOwn.length + 1}`, comment: ''
+    id: `${sampleStudentOwn.length + 1}`, name: `Feedback ${sampleStudentOwn.length + 1}`, comment: ''
   })
   const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>(sampleStudentOwn);
 
+  const [editId, setEditId] = useState<string | null>(null);
 
   const handleDownload = () => {
     console.log('Download feedback clicked')
@@ -62,6 +63,12 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   }
 
   const handleEdit = (id: string) => {
+    const selectedFeedback = studentFeedbacks.find(fb => fb.id === id);
+    if (!selectedFeedback) return;
+
+    setEditId(id);
+    setFeedback(selectedFeedback);
+    setEditShow(true)
     console.log('Edit feedback', id)
   }
 
@@ -76,9 +83,13 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
 
   const handleClose = () => setShow(false);
 
-  const handleEditShow = () => {
-    setEditShow(true)
-  };
+  const handleEditSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setStudentFeedbacks(prev => prev.map(fb => 
+      fb.id === editId ? {...fb, comment: feedback.comment} : f
+    ));
+    setEditShow(false);
+  }
 
   const handleEditClose = () => setEditShow(false);
 
@@ -137,7 +148,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
                       </div>
 
                       <div>
-                        <Button variant="link" className={styles.editButton} onClick={handleEditShow} aria-label="Edit">
+                        <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s.id)} aria-label="Edit">
                           ✏️
                         </Button>
                       </div>
@@ -163,7 +174,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         <Modal.Body>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Label>Leave your feedback here</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange}/>
+            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required/>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -182,11 +193,11 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         <Modal.Header closeButton>
           <Modal.Title>Edit Feedback</Modal.Title>
         </Modal.Header>
-        <Form >
+        <Form onSubmit={handleEditSubmit}>
         <Modal.Body>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Label>Edit your feedback</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange}></Form.Control>
+            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required></Form.Control>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
