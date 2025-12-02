@@ -1,6 +1,7 @@
 
 import React from 'react'
-import { Row, Col, Navbar, Button, Card } from 'react-bootstrap'
+import { Row, Col, Button, Card } from 'react-bootstrap'
+import { NavBar } from './NavBar'
 import { useNavigate } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
 
@@ -57,29 +58,12 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
 
   return (
     <div className={styles.pageRoot}>
-      <div className="d-flex align-items-stretch">
-        <div className={styles.logoColumn}>
-          <div className={styles.logoIcon} />
-        </div>
-
-        <Navbar bg="white" className={`${styles.header} border-bottom`}>
-          <div className={`d-flex align-items-center ${styles.headerInner}`}>
-            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
-
-            <div className="mx-auto text-center">
-              <div className={styles.title}>{lessonTitle}</div>
-            </div>
-
-            <div className={styles.headerRight}>
-              <Button variant="link" className={styles.logoutButton}>Logout</Button>
-              <div className={styles.avatar}>TS</div>
-            </div>
-          </div>
-        </Navbar>
-      </div>
+      
+        <NavBar></NavBar>
 
       <div className={styles.content}>
         <div className={styles.contentInner}>
+        <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
           <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
 
         {isTeacher ? (

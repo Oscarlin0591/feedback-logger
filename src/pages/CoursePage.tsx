@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavBar } from "../components/NavBar";
-import { Container } from "react-bootstrap";
-import { useLocation, useParams } from "react-router-dom";
+import { Button, Container } from "react-bootstrap";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { WeekCard } from "../components/WeekCard";
 import { LessonCard } from "../components/LessonCard";
 import QULogo from '../assets/qu-logo.png'
@@ -13,10 +13,21 @@ export default function CoursePage() {
     const { courseTitle } = location.state || {};
     const { id } = useParams();
 
+    const navigate = useNavigate()
+
+    const handleBack = () => {
+    // if there's history, go back; otherwise go to main
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/main')
+    }
+  }
     
     return (
         <>
             <NavBar></NavBar>
+            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
             <Container style={{display: 'flex', backgroundColor: 'black', height: '1px', width: '100%'}}></Container>
             <Container style={{
                 display: "flex",

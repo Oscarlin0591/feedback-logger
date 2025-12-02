@@ -3,7 +3,6 @@
   --card-bg: #ffffff;
   --muted: #6b7280;
   --border: #e5e7eb;
-  --accent: #2563eb;
   --dark: #111827;
 }
 
@@ -11,9 +10,11 @@
   position: relative;
   height: 100vh; /* ensure full viewport height */
   min-height: 100vh;
+  width: 1280px;
   background: var(--bg);
   display: flex;
   flex-direction: column;
+  padding: 24px;
 }
 
 /* vertical blue strip on far left */
@@ -37,21 +38,6 @@
   flex: 0 0 auto;
 }
 
-.logoColumn {
-  width: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logoIcon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg,#eef2ff,#e0f2fe);
-  border-radius: 6px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04) inset;
-}
-
 .headerInner {
   flex: 1;
   display: flex;
@@ -70,6 +56,7 @@
   padding: 6px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 36px;
 }
 
 .title {
@@ -132,6 +119,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: start;
   gap: 12px;
   flex: 1 1 auto;
 }
