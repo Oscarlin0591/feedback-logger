@@ -1,11 +1,8 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
 import QULogo from './assets/qu-logo.png'
 // import './App.css'
 import { Container } from 'react-bootstrap'
 import { CourseCard } from './components/CourseCard'
 import { NavBar } from './components/NavBar'
-import LessonFeedbackPage from './components/LessonFeedbackPage'
 
 function App() {
 
