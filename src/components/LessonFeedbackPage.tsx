@@ -41,6 +41,20 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
 
   const handleDownload = () => {
     console.log('Download feedback clicked')
+
+    //Text Generation
+    var downloadableText = "";
+    for(let i = 0; i<sampleStudents.length; i++) {
+      downloadableText = downloadableText + "ID: " + sampleStudents[i].id + " | Student Name: " + sampleStudents[i].name + " | Comment: " + sampleStudents[i].comment + "\n"; 
+    }
+
+    //Actual download generation
+    const element = document.createElement("a");
+    const file = new Blob([downloadableText], {type: "text/plain"});
+    element.href=URL.createObjectURL(file);
+    element.download="exportedFeedback.txt";
+    document.body.appendChild(element);
+    element.click();
   }
 
   const handleGive = () => {
