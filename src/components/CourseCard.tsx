@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Card, CardBody, CardImg, CardText, CardTitle } from "react-bootstrap"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import styles from './CourseCard.module.css';
 
 export function CourseCard(props : {img:string, courseTitle:string, courseDescription:string, courseNum:number}){
