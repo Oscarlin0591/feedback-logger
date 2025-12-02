@@ -1,0 +1,10 @@
+.Card {
+    width: 800;
+    margin: 12px;
+    padding: 3px;
+    align-items: left;
+}
+.bigText {
+  font-size: 50px;   
+  font-weight: bold; 
+}
