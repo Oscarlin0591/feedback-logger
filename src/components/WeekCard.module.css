@@ -1,9 +1,10 @@
 .Card {
-    width: 800;
+    width: 100%;
     margin: 12px;
-    padding: 3px;
-    align-items: left;
+    padding: 12px;
+    align-items: center;
 }
+
 .bigText {
   font-size: 40px;   
   font-weight: bold; 

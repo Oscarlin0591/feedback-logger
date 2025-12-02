@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App.tsx'
 import { BrowserRouter, Route, Routes, useParams } from 'react-router-dom'
 import CoursePage from './pages/CoursePage.tsx'

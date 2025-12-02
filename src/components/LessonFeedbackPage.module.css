@@ -12,12 +12,11 @@ body {
 }
 
 .page {
-  width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  min-height: 100vh;
+  display: block;
+  position: relative; 
 }
 
 .header {
@@ -53,30 +52,11 @@ body {
   font-size: 36px;
 }
 
-.title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--dark);
-  text-align: center;
-}
-
 .headerRight {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.logoutButton {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 6px 8px;
-  font-weight: 600;
 }
 
 .avatar {
@@ -92,17 +72,12 @@ body {
 }
 
 .content {
-  /* Make the main content fill remaining vertical space and the full width of the page */
-  flex: 1 1 auto;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0;
+  width: 1280px;
   padding: 24px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: auto;
 }
 
 .contentInner {
@@ -113,9 +88,8 @@ body {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   gap: 12px;
-  flex: 1 1 auto;
 }
 
 .sectionTitle {

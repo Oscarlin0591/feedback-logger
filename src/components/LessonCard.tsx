@@ -15,7 +15,7 @@ export function LessonCard(props : {
     const courseSegment = props.courseId ? `/course/${props.courseId}` : ''
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <>
             <Card className={styles.Card} onClick={() => navigate(`${courseSegment}/lesson/${props.lessonID}`)}>
                 <div className={styles.lessonRow}>
                     <CardImg src={props.img} className={styles.lessonImg} />
@@ -29,6 +29,6 @@ export function LessonCard(props : {
                     </div>
                 </div>
             </Card>
-        </div>
+        </>
     )
 }

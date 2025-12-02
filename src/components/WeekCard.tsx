@@ -11,7 +11,7 @@ export function WeekCard({weekTitle, children}: WeekCardProps) {
     const navigate = useNavigate();
 
     return (
-        <Card className={styles.card}>
+        <Card className={styles.Card}>
             <div className={styles.bigText}>{weekTitle}</div>
             <hr></hr>
             {children}

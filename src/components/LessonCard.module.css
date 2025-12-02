@@ -1,10 +1,10 @@
 .Card {
     display: flex;
     flex-direction: column;
-    width: 700px;
+    width: 100%;
     border: 1px solid black;
-    margin: 12px;
-    padding: 3px;
+    margin: 16px;
+    padding: 4px;
     align-items: flex-start;
     transition: 0.3s;
 }

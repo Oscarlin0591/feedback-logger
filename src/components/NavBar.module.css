@@ -7,8 +7,11 @@
 
 .NavLink {
     background-color: rgb(120, 120, 120);
+    border-radius: 2px;
+    width: 96px;
     padding: 8px;
     color: black;
+    text-align: center;
     text-decoration: underline;
 }
 
