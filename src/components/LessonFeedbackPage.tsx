@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react'
-import { Row, Col, Button, Card, Modal, Container } from 'react-bootstrap'
+import React, { useState, type ChangeEvent, type FormEvent } from 'react'
+import { Row, Col, Button, Card, Modal, Container, InputGroup, Form } from 'react-bootstrap'
 import { NavBar } from './NavBar'
 import { useNavigate } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
@@ -24,13 +24,18 @@ const sampleStudents: Feedback[] = [
   { id: 's3', name: 'Student 3', comment: 'Loved the group activity' },
 ]
 
-let sampleStudentOwn: Feedback[] = [
+const sampleStudentOwn: Feedback[] = [
 { id: 'me', name: 'Feedback 1', comment: 'I think this lesson is too hard'}
 ]
 
 const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   const isTeacher = mode === 'teacher'
   const [show, setShow] = useState(false);
+  const [editShow, setEditShow] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback>({
+    id: 'me', name: `Feedback ${sampleStudentOwn.length + 1}`, comment: ''
+  })
+  const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>(sampleStudentOwn);
 
 
   const handleDownload = () => {
@@ -53,19 +58,43 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
 
   const handleGive = () => {
     console.log('Give feedback clicked')
-    const newFeedback : Feedback = {id: 'me', name: 'Feedback 2', comment: 'I like this lesson'}
-    sampleStudentOwn = [
-      ...sampleStudentOwn,
-      newFeedback
-    ]
     setShow(true);
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setStudentFeedbacks(prev => [...prev, feedback])
+
+    // clears text area
+    setFeedback(prev => ({
+      ...prev,
+      comment: ''
+    }));
+
+    console.log(studentFeedbacks)
+    setShow(false);
   }
 
   const handleEdit = (id: string) => {
     console.log('Edit feedback', id)
   }
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFeedback((prevData) => ({
+      ...prevData,
+      name: `Feedback ${studentFeedbacks.length + 1}`,
+      [name]: value
+    }))
+  }
+
   const handleClose = () => setShow(false);
+
+  const handleEditShow = () => {
+    setEditShow(true)
+  };
+
+  const handleEditClose = () => setEditShow(false);
 
   const navigate = useNavigate()
 
@@ -112,7 +141,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
             </div>
           ) : (
             <div className={styles.feedbackList}>
-              {sampleStudentOwn.map((s) => (
+              {studentFeedbacks.map((s) => (
                 <Card className={`${styles.feedbackCard}`}>
                   <Card.Body>
                     <div className="d-flex align-items-start justify-content-between">
@@ -122,7 +151,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
                       </div>
 
                       <div>
-                        <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s.id)} aria-label="Edit">
+                        <Button variant="link" className={styles.editButton} onClick={handleEditShow} aria-label="Edit">
                           ✏️
                         </Button>
                       </div>
@@ -138,19 +167,51 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
           </div>
         </div>
       </Container>
+
+      {/* Feedback Model and submission logic */}
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>Give Feedback</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        <Form onSubmit={handleSubmit}>
+        <Modal.Body>
+          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+            <Form.Label>Leave your feedback here</Form.Label>
+            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange}/>
+          </Form.Group>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          <Button type='submit' variant="primary">
             Save Changes
           </Button>
         </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Edit Feedback */}
+      <Modal show={editShow} onHide={handleEditClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Feedback</Modal.Title>
+        </Modal.Header>
+        <Form >
+        <Modal.Body>
+          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+            <Form.Label>Edit your feedback</Form.Label>
+            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange}></Form.Control>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleEditClose}>
+            Close
+          </Button>
+          <Button type='submit' variant="primary">
+            Save Changes
+          </Button>
+        </Modal.Footer>
+        </Form>
       </Modal>
     </>
   )
