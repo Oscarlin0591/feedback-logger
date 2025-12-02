@@ -1,0 +1,27 @@
+.pageBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 1280px;
+    align-items: center;
+
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    text-align: center;
+}
+
+.formInput {
+    height: 25px;
+    border-radius: 5px;
+    
+}

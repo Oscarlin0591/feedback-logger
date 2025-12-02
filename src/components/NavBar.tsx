@@ -8,10 +8,10 @@ export const NavBar = () => {
     return (
         <Navbar className={styles.NavBar}>
             <Container>
-                <NavbarBrand href="/" className={styles.NavBrand}>
+                <NavbarBrand href="/main" className={styles.NavBrand}>
                 <img width='48' height='48' className={styles.logo} src={Logo}/>
                 </NavbarBrand>
             </Container>
-            <NavLink className={styles.NavLink}>Log out</NavLink>
+            <NavLink className={styles.NavLink} href="/">Log out</NavLink>
         </Navbar>);
     }
