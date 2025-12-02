@@ -90,6 +90,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     const { name, value } = e.target;
     setFeedback((prevData) => ({
       ...prevData,
+      id: `${studentFeedbacks.length + 1}`,
       name: `Feedback ${studentFeedbacks.length + 1}`,
       [name]: value
     }))
