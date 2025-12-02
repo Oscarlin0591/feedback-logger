@@ -25,7 +25,6 @@ function App() {
         <CourseCard img={QULogo} courseTitle={'Course 3'} courseDescription={'Description of Course 3'} courseNum={3}/>
         <CourseCard img={QULogo} courseTitle={'Course 4'} courseDescription={'Description of Course 4'} courseNum={4}/>
      </Container>
-     <LessonFeedbackPage mode="student" lessonTitle="Sample Lesson" />
     </>
   )
 }

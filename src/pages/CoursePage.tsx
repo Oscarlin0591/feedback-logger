@@ -11,7 +11,7 @@ export default function CoursePage() {
     console.log("Clicked")
     const location = useLocation();
     const { courseTitle } = location.state || {};
-    const { courseNum } = useParams();
+    const { id } = useParams();
 
     
     return (
