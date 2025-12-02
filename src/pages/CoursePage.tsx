@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { NavBar } from "../components/NavBar";
 import { Container } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { WeekCard } from "../components/WeekCard";
 import { LessonCard } from "../components/LessonCard";
 import QULogo from '../assets/qu-logo.png'
+import styles from './CoursePage.module.css';
 
 export default function CoursePage() {
     console.log("Clicked")
-    const [courseTitle, setCourseTitle] = useState('');
-    const { id } = useParams();
+    const location = useLocation();
+    const { courseTitle } = location.state || {};
+    const { courseNum } = useParams();
 
     
     return (
@@ -23,8 +25,12 @@ export default function CoursePage() {
                 margin: "0 auto",
                 justifyContent: 'space-between',
             }}>
-                <h2>Course {id}</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
+                        <div className={styles.courseTitle}>
+                            {courseTitle}
+                        </div>
+                    </div>
                     <WeekCard weekTitle="Week 1">
                         <LessonCard courseId={id} img={QULogo} lessonTitle="Lesson 1" lessonDesc="This is Lesson 1" lessonID={0}></LessonCard>
                         <LessonCard courseId={id} img={QULogo} lessonTitle="Lesson 2" lessonDesc="This is Lesson 2" lessonID={1}></LessonCard>

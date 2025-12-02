@@ -10,8 +10,8 @@ export function CourseCard(props : {img:string, courseTitle:string, courseDescri
     return (
         <>
             {/* <Link to={`/course?courseNum=${props.courseNum.toString()}`}> */}
-                <Card className={styles.Card} onClick={() => navigate({
-                    pathname: `/course/${props.courseNum}`
+                <Card className={styles.Card} onClick={() => navigate(`/course/${props.courseNum}`, {
+                    state: {courseTitle: props.courseTitle}
                 })}>
                     <CardImg variant="top" src={props.img} style={{width: "100%"}}/>
                     <CardBody style={{padding: "8px 4px"}}>
