@@ -11,6 +11,7 @@ export default function CoursePage() {
     console.log("Clicked")
     const location = useLocation();
     const { courseTitle } = location.state || {};
+    const { profName } = location.state || {}; 
     const { id } = useParams();
 
     
@@ -27,9 +28,8 @@ export default function CoursePage() {
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
-                        <div className={styles.courseTitle}>
-                            {courseTitle}
-                        </div>
+                        <div className={styles.courseTitle}> {courseTitle}</div>
+                        <div className={styles.profName}>{profName}</div>
                     </div>
                     <WeekCard weekTitle="Week 1">
                         <LessonCard courseId={id} img={QULogo} lessonTitle="Lesson 1" lessonDesc="This is Lesson 1" lessonID={0}></LessonCard>

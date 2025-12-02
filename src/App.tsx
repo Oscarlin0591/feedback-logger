@@ -20,10 +20,10 @@ function App() {
       flexWrap: "wrap",
       justifyContent: 'space-between',
     }}>
-        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} courseNum={1}/>
-        <CourseCard img={QULogo} courseTitle={'Course 2'} courseDescription={'Description of Course 2'} courseNum={2}/>
-        <CourseCard img={QULogo} courseTitle={'Course 3'} courseDescription={'Description of Course 3'} courseNum={3}/>
-        <CourseCard img={QULogo} courseTitle={'Course 4'} courseDescription={'Description of Course 4'} courseNum={4}/>
+        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} courseNum={1} profName={'Professor Ruby'}/>
+        <CourseCard img={QULogo} courseTitle={'Course 2'} courseDescription={'Description of Course 2'} courseNum={2} profName={'Professor Shah'}/>
+        <CourseCard img={QULogo} courseTitle={'Course 3'} courseDescription={'Description of Course 3'} courseNum={3} profName={'Professor Blake'}/>
+        <CourseCard img={QULogo} courseTitle={'Course 4'} courseDescription={'Description of Course 4'} courseNum={4} profName={'Professor Johnson'}/>
      </Container>
     </>
   )

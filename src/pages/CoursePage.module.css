@@ -1,4 +1,8 @@
 .courseTitle {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: bold; 
+}
+.profName {
+    font-size: 16px;
+    color:gray;
 }
