@@ -205,7 +205,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         <Form onSubmit={handleSubmit}>
         <Modal.Body>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-            <Form.Label>Leave your feedback here</Form.Label>
+            <Form.Label>What did you think of this lesson?</Form.Label>
             <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required/>
           </Form.Group>
         </Modal.Body>

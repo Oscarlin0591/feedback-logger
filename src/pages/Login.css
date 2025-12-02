@@ -5,6 +5,14 @@
     justify-content: center;
 }
 
+.passBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 16px auto;
+}
+
 .form {
     display: flex;
     flex-direction: column;
