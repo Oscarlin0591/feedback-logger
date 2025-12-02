@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Card, CardBody, CardImg, CardText, CardTitle, Col, Row } from "react-bootstrap"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import styles from './LessonCard.module.css';
 
 export function LessonCard(props : {
@@ -9,11 +9,12 @@ export function LessonCard(props : {
     lessonDesc:string, 
     lessonID:number
 }) {
+    const {param} = useParams();
     const navigate = useNavigate();
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Card className={styles.Card} onClick={() => navigate({pathname: ``/*Insert respective feedback path here*/})}>
+            <Card className={styles.Card} onClick={() => navigate({pathname: `${param}/${props.lessonID}`})}>
                 <div className={styles.lessonRow}>
                     <CardImg src={props.img} className={styles.lessonImg} />
                     <div className={styles.textArea}>
