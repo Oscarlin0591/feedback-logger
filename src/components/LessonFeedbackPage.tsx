@@ -95,17 +95,34 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     }))
   }
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setFeedback(prev => ({
+      ...prev,
+      comment: ''
+    }));
+    setShow(false)
+  };
 
   const handleEditSubmit = (e: FormEvent) => {
     e.preventDefault();
     setStudentFeedbacks(prev => prev.map(fb => 
       fb.id === editId ? {...fb, comment: feedback.comment} : f
     ));
+
+    setFeedback(prev => ({
+      ...prev,
+      comment: ''
+    }));
     setEditShow(false);
   }
 
-  const handleEditClose = () => setEditShow(false);
+  const handleEditClose = () => {
+    setFeedback(prev => ({
+      ...prev,
+      comment: ''
+    }));
+    setEditShow(false)
+  };
 
   const navigate = useNavigate()
 
