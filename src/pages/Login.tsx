@@ -31,6 +31,10 @@ function Login() {
             navigate({
                 pathname: "main"
             })
+        } else if (formData.email.toLowerCase() === 'user@qu.edu' && formData.password.toLowerCase() === 'password') {
+            navigate({
+                pathname: "main"
+            })
         } else {
             alert("Invalid login");
         }
