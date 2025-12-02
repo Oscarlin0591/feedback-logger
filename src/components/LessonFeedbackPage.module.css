@@ -9,6 +9,7 @@
 
 .pageRoot {
   position: relative;
+  height: 100vh; /* ensure full viewport height */
   min-height: 100vh;
   background: var(--bg);
   display: flex;
@@ -21,7 +22,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  bottom: 0;
+  height: 100vh;
   width: 3px;
   background: var(--accent);
 }
@@ -33,6 +34,7 @@
   align-items: stretch;
   padding: 8px 16px;
   z-index: 10;
+  flex: 0 0 auto;
 }
 
 .logoColumn {
@@ -109,11 +111,29 @@
 }
 
 .content {
-  width: 100%;
-  max-width: 820px;
-  margin: 24px auto;
+  /* Make the main content fill remaining vertical space and the full width of the page */
+  flex: 1 1 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0;
   padding: 24px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto;
+}
+
+.contentInner {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto;
 }
 
 .sectionTitle {
@@ -121,12 +141,15 @@
   font-size: 16px;
   color: var(--dark);
   font-weight: 700;
+  align-self: stretch; /* make title align to left edge of the content area */
 }
 
 .feedbackList {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  flex: 1 1 auto;
 }
 
 .feedbackCard {
@@ -135,6 +158,8 @@
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(16,24,40,0.04);
   padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cardHeader {

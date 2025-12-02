@@ -28,13 +28,13 @@ function Login() {
         e.preventDefault();
         console.log('Form data submitted: ', formData);
         if (formData.email.toLowerCase() === 'admin@qu.edu' && formData.password.toLowerCase() === 'password') {
-            navigate({
-                pathname: "main"
-            })
+            // mark role as admin
+            localStorage.setItem('role', 'admin')
+            navigate({ pathname: "main" })
         } else if (formData.email.toLowerCase() === 'user@qu.edu' && formData.password.toLowerCase() === 'password') {
-            navigate({
-                pathname: "main"
-            })
+            // mark role as student
+            localStorage.setItem('role', 'student')
+            navigate({ pathname: "main" })
         } else {
             alert("Invalid login");
         }

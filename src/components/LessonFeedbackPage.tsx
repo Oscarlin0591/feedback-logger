@@ -1,6 +1,7 @@
 
 import React from 'react'
-import { Container, Row, Col, Navbar, Button, Card } from 'react-bootstrap'
+import { Row, Col, Navbar, Button, Card } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
 
 type Mode = 'teacher' | 'student'
@@ -43,6 +44,17 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     console.log('Edit feedback', id)
   }
 
+  const navigate = useNavigate()
+
+  const handleBack = () => {
+    // if there's history, go back; otherwise go to main
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/main')
+    }
+  }
+
   return (
     <div className={styles.pageRoot}>
       <div className="d-flex align-items-stretch">
@@ -51,8 +63,8 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         </div>
 
         <Navbar bg="white" className={`${styles.header} border-bottom`}>
-          <Container fluid className={`d-flex align-items-center ${styles.headerInner}`}>
-            <Button variant="link" className={`${styles.backButton}`}>←</Button>
+          <div className={`d-flex align-items-center ${styles.headerInner}`}>
+            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
 
             <div className="mx-auto text-center">
               <div className={styles.title}>{lessonTitle}</div>
@@ -62,12 +74,13 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
               <Button variant="link" className={styles.logoutButton}>Logout</Button>
               <div className={styles.avatar}>TS</div>
             </div>
-          </Container>
+          </div>
         </Navbar>
       </div>
 
-      <Container className={styles.content}>
-        <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
+      <div className={styles.content}>
+        <div className={styles.contentInner}>
+          <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
 
         {isTeacher ? (
           <div className={styles.feedbackList}>
@@ -115,7 +128,8 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
             </Button>
           </div>
         )}
-      </Container>
+        </div>
+      </div>
     </div>
   )
 }
