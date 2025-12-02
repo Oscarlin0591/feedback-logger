@@ -106,7 +106,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   const handleEditSubmit = (e: FormEvent) => {
     e.preventDefault();
     setStudentFeedbacks(prev => prev.map(fb => 
-      fb.id === editId ? {...fb, comment: feedback.comment} : f
+      fb.id === editId ? {...fb, comment: feedback.comment} : fb
     ));
 
     setFeedback(prev => ({
