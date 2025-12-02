@@ -12,10 +12,12 @@ body {
 }
 
 .page {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   margin: 0 auto;
   min-height: 100vh;
-  display: block;
+  align-items: center;
   position: relative; 
 }
 
@@ -29,6 +31,15 @@ body {
   padding: 8px 16px;
   flex: 0 0 auto;
   text-align: center;
+}
+
+.inputArea {
+  display: flex;
+  flex-direction: column;
+}
+
+textarea {
+  width: 100%;
 }
 
 .headerInner {
