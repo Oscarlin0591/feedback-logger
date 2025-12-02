@@ -3,7 +3,7 @@ import { Card, CardBody, CardImg, CardText, CardTitle } from "react-bootstrap"
 import { Link, useNavigate } from "react-router-dom"
 import styles from './CourseCard.module.css';
 
-export function CourseCard(props : {img:string, courseTitle:string, courseDescription:string, courseNum:number, profName:string}){
+export function CourseCard(props : {img:string, courseTitle:string, courseDescription:string, courseNum:string, profName:string}){
 
     const navigate = useNavigate();
 

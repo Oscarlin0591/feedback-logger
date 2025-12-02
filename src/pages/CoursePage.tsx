@@ -12,6 +12,8 @@ export default function CoursePage() {
     const location = useLocation();
     const { courseTitle } = location.state || {};
     const { profName } = location.state || {}; 
+    const { courseNum } = location.state || {};
+
     const { id } = useParams();
 
     
@@ -27,9 +29,10 @@ export default function CoursePage() {
                 justifyContent: 'space-between',
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignContent: 'left'}}>
                         <div className={styles.courseTitle}> {courseTitle}</div>
-                        <div className={styles.profName}>{profName}</div>
+                        <div className={styles.smallText}>{profName}</div>
+                        <div className={styles.smallText}>{courseNum}</div>
                     </div>
                     <WeekCard weekTitle="Week 1">
                         <LessonCard courseId={id} img={QULogo} lessonTitle="Lesson 1" lessonDesc="This is Lesson 1" lessonID={0}></LessonCard>
