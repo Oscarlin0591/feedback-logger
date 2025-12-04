@@ -17,10 +17,10 @@ function App() {
       flexWrap: "wrap",
       justifyContent: 'space-between',
     }}>
-        <CourseCard img={QULogo} courseTitle={'Course 1'} courseDescription={'Description of Course 1'} courseNum='MA-229' profName={'Professor Johnson'}/>
-        <CourseCard img={QULogo} courseTitle={'Course 2'} courseDescription={'Description of Course 2'} courseNum='SER-340' profName={'Professor Shah'}/>
-        <CourseCard img={QULogo} courseTitle={'Course 3'} courseDescription={'Description of Course 3'} courseNum='CSC-310' profName={'Professor Blake'}/>
-        <CourseCard img={QULogo} courseTitle={'Course 4'} courseDescription={'Description of Course 4'} courseNum='CSC-340' profName={'Professor ElKharboutly'}/>
+        <CourseCard img={QULogo} courseTitle={'MA-229'} courseDescription={'Applied Statistics'} courseNum='MA-229' profName={'Professor Johnson'}/>
+        <CourseCard img={QULogo} courseTitle={'SER-325'} courseDescription={'Databases Systems'} courseNum='SER-325' profName={'Professor Shah'}/>
+        <CourseCard img={QULogo} courseTitle={'CSC-310'} courseDescription={'Operating Systems'} courseNum='CSC-310' profName={'Professor Blake'}/>
+        <CourseCard img={QULogo} courseTitle={'CSC-340'} courseDescription={'Full Stack Development'} courseNum='CSC-340' profName={'Professor ElKharboutly'}/>
      </Container>
     </>
   )
