@@ -9,6 +9,7 @@ export function LessonCard(props : {
     lessonDesc:string,
     lessonID:number,
     courseId?: string | undefined
+    isLocked: boolean
 }) {
     const navigate = useNavigate();
 
