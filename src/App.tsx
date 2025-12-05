@@ -17,6 +17,7 @@ function App() {
       flexWrap: "wrap",
       justifyContent: 'space-between',
     }}>
+      {/* manually added four courses in CourseCard components */}
         <CourseCard img={QULogo} courseTitle={'MA-229'} courseDescription={'Applied Statistics'} courseNum='MA-229' profName={'Professor Johnson'}/>
         <CourseCard img={QULogo} courseTitle={'SER-325'} courseDescription={'Databases Systems'} courseNum='SER-325' profName={'Professor Shah'}/>
         <CourseCard img={QULogo} courseTitle={'CSC-310'} courseDescription={'Operating Systems'} courseNum='CSC-310' profName={'Professor Blake'}/>

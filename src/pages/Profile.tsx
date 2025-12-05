@@ -26,6 +26,7 @@ export default function Profile() {
     useEffect(() => {
         let selectedUser: User;
 
+        // loads user info based off of whether user is student or admin
         if (role === 'admin') {
             selectedUser = profiles[1];
         } else if (role === 'student') {
@@ -39,9 +40,10 @@ export default function Profile() {
         setEditForm(selectedUser)
     }, [role])
 
+    // image upload fucntionality
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
+        if (file) { // filereader class takes img string and read the pathed image file
             const reader = new FileReader();
             reader.onloadend = () => {
                 setProfileImage(String(reader.result));
@@ -50,6 +52,7 @@ export default function Profile() {
         }
     };
 
+    // live update on value changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!editForm) return;
         const { name, value } = e.target;
@@ -69,15 +72,13 @@ export default function Profile() {
             <Container className={styles.pageBody}>
                 <section id="about">
                     <Row className="align-items-center flex-row-reverse">
-                        
-                        {/* LEFT — PROFILE FIELDS */}
                         <Col lg={6}>
                             <h3 className="text-dark">Profile</h3>
-
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-2">
                                         <Form.Label className="fw-bold">Name</Form.Label>
+                                        {/* editing ternary to display form when isEdit is true and p tag when false, overlays for all fields */}
                                         {isEditing ? (
                                             <Form.Control
                                                 name="name"
