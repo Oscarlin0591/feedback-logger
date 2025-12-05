@@ -1,0 +1,20 @@
+[
+    {
+    "name": "John User",
+    "classYear": 2027,
+    "major": "Software Engineer",
+    "department": "School of Computing and Engineering",
+    "role": "student",
+    "email": "user@quinnipiac.edu",
+    "profileImage": "/default-avatar.jpg"
+    },
+    {
+    "name": "Alice Admin",
+    "classYear": 2006,
+    "major": "Computer Science Ph.D",
+    "department": "School of Computing and Engineering",
+    "role": "admin",
+    "email": "admin@quinnipiac.edu",
+    "profileImage": "/default-avatar.jpg"
+    }
+]

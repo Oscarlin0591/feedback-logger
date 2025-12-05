@@ -6,12 +6,19 @@
 }
 
 .NavLink {
-    background-color: rgb(120, 120, 120);
+    background-color: rgb(215, 215, 215);
     border-radius: 2px;
     width: 96px;
     padding: 8px;
     color: black;
     text-align: center;
+    text-decoration: none;
+    margin: 0 8px;
+    transition: 0.25s;
+}
+
+.NavLink:hover {
+    background-color: rgb(185, 185, 185);
     text-decoration: underline;
 }
 
@@ -21,4 +28,9 @@
 
 .logo {
     margin: 16px;
+}
+
+.icon {
+    width: 32px;
+    border-radius: 50%;
 }

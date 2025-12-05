@@ -19,6 +19,7 @@ function LessonFeedbackRoute() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    {/*Routing for all pages */}
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />}></Route>
