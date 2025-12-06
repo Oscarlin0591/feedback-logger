@@ -22,6 +22,7 @@ function Login() {
     const [newPass, setNewPass] = useState('');
     const [show, setShow] = useState(false);
 
+    // update form data to be submitted as user type in
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value} = e.target;
         setFormData((prevData) => ({
@@ -30,21 +31,27 @@ function Login() {
         }))
     };
 
+    // live update on password to be submitted as user types
     const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value} = e.target;
         setNewPass(value)
-
-        
     };
 
     const handlePassSubmit = (e: FormEvent) => {
         e.preventDefault()
+        
+        //temporary password change logic
+        if (newPass !== adminPass && newPass !== studentPass) {
         setAdminPass(newPass)
         setStudentPass(newPass)
+        } else {
+            alert('Password cannot be same as previous password!')
+        }
         setNewPass('');
         setShow(false);
     }
 
+    // form submission logic
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         console.log('Form data submitted: ', formData);
