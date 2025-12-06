@@ -5,7 +5,13 @@ import "./Login.css";
 
 interface FormData {
     email: string,
-    password: string
+    password: string,
+    password1: string
+}
+
+interface PassChange {
+    newPass: string,
+    repass: string
 }
 
 function Login() {
@@ -14,12 +20,16 @@ function Login() {
     const [formData, setFormData] = useState<FormData>({
         email: '',
         password: '',
+        password1: '',
     });
     const [adminUser, setAdminUser] = useState('admin@qu.edu');
     const [adminPass, setAdminPass] = useState('password');
     const [studentUser, setStudentUser] = useState('user@qu.edu');
     const [studentPass, setStudentPass] = useState('password');
-    const [newPass, setNewPass] = useState('');
+    const [newPass, setNewPass] = useState<PassChange>({
+        newPass: '',
+        repass: ''
+    });
     const [show, setShow] = useState(false);
 
     // update form data to be submitted as user type in
@@ -33,23 +43,41 @@ function Login() {
 
     // live update on password to be submitted as user types
     const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value} = e.target;
-        setNewPass(value)
-    };
+    const { name, value } = e.target;
+
+    setNewPass(prev => {
+        const updated = { ...prev, [name]: value };
+
+        return updated;
+    });
+};
 
     const handlePassSubmit = (e: FormEvent) => {
-        e.preventDefault()
-        
-        //temporary password change logic
-        if (newPass !== adminPass && newPass !== studentPass) {
-        setAdminPass(newPass)
-        setStudentPass(newPass)
-        } else {
-            alert('Password cannot be same as previous password!')
-        }
-        setNewPass('');
-        setShow(false);
+    e.preventDefault();
+
+    if (newPass.newPass !== newPass.repass) {
+        alert("Passwords do not match");
+        return;
     }
+
+    // Do not allow reusing the same password
+    if (newPass.newPass === adminPass || newPass.newPass === studentPass) {
+        alert("Password cannot be same as previous password!");
+        return;
+    }
+
+    // Update passwords (temporary logic)
+    setAdminPass(newPass.newPass);
+    setStudentPass(newPass.newPass);
+
+    alert("Password successfully changed!");
+
+    // Reset fields
+    setNewPass({ newPass: '', repass: '' });
+
+    setShow(false);
+};
+
 
     // form submission logic
     const handleSubmit = (e: FormEvent) => {
@@ -73,7 +101,7 @@ function Login() {
     }
 
     const handleClose = () => {
-        setNewPass('');
+        setNewPass({ newPass: '', repass: '' });
         setShow(false)
   };
 
@@ -112,8 +140,12 @@ function Login() {
             </Form.Group>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Label>New Password</Form.Label>
-            <Form.Control as="input" name="newPass" value={newPass} onChange={handlePasswordChange} required/>
+            <Form.Control as="input" type="password" name="newPass" placeholder="New Password" value={newPass.newPass} onChange={handlePasswordChange} required/>
           </Form.Group>
+          <Form.Group className="mb-3" controlId="formGroupPassword">
+                <Form.Label>Re-enter Password:</Form.Label>
+                <Form.Control as="input" type="password" name="repass" placeholder="Re-enter Password" value={newPass.repass} onChange={handlePasswordChange} required/>
+            </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
