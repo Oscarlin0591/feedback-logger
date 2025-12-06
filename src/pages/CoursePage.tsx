@@ -77,8 +77,8 @@ export default function CoursePage() {
                                         key={id}
                                         courseId={id.toString()}
                                         img={QULogo}
-                                        lessonTitle={`Lesson ${id % 2 + 1}`}
-                                        lessonDesc={`This is Lesson ${id % 2 + 1}`}
+                                        lessonTitle={`Lesson ${id + 1}`}
+                                        lessonDesc={`This is Lesson ${id + 1}`}
                                         lessonID={id}
                                         isLocked={false}
                                     />
