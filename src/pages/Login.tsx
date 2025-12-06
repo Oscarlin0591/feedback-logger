@@ -91,7 +91,7 @@ function Login() {
                 <Form.Control className="formInput" type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange}/>
             </Form.Group>
             <Button className="button" variant="primary" type="submit">
-                Submit
+                Sign In
             </Button>
             </Form>
 
