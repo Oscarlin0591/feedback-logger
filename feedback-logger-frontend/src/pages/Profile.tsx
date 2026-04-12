@@ -3,7 +3,6 @@ import { NavBar } from "../components/NavBar"
 import styles from "./Profile.module.css"
 import defaultImage from "../../public/default-avatar.jpg"
 import { useEffect, useState } from "react";
-import profiles from "../users.json";
 
 interface User {
     name: string,
@@ -15,35 +14,47 @@ interface User {
     profileImage: string
 }
 
+// Decode the JWT payload without a library (base64 decode the middle segment)
+function decodeToken(token: string): Partial<User> | null {
+    try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        return decoded as Partial<User>;
+    } catch {
+        return null;
+    }
+}
+
 export default function Profile() {
-    const [profileImage, setProfileImage] = useState<string | null>(defaultImage);
+    const [profileImage, setProfileImage] = useState<string>(defaultImage);
     const [user, setUser] = useState<User>()
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<User | null>(null);
 
-    const role = localStorage.getItem('role')
-
     useEffect(() => {
-        let selectedUser: User;
+        const token = localStorage.getItem('token');
+        if (!token) return;
 
-        // loads user info based off of whether user is student or admin
-        if (role === 'admin') {
-            selectedUser = profiles[1];
-        } else if (role === 'student') {
-            selectedUser = profiles[0];
-        } else {
-            selectedUser = profiles[0];
-        }
-        
-        setUser(selectedUser);
-        setProfileImage(user?.profileImage!)
-        setEditForm(selectedUser)
-    }, [role])
+        const payload = decodeToken(token);
+        if (!payload) return;
 
-    // image upload fucntionality
+        const baseUser: User = {
+            name: payload.name ?? '',
+            email: payload.email ?? '',
+            role: payload.role ?? '',
+            classYear: null,
+            major: '',
+            department: '',
+            profileImage: defaultImage,
+        };
+
+        setUser(baseUser);
+        setEditForm(baseUser);
+    }, []);
+
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) { // filereader class takes img string and read the pathed image file
+        if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setProfileImage(String(reader.result));
@@ -52,7 +63,6 @@ export default function Profile() {
         }
     };
 
-    // live update on value changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!editForm) return;
         const { name, value } = e.target;
@@ -61,7 +71,7 @@ export default function Profile() {
 
     const saveChanges = () => {
         if (!editForm) return;
-        setUser(editForm); // update UI only
+        setUser(editForm);
         setIsEditing(false);
     };
 

@@ -16,6 +16,6 @@ export const NavBar = () => {
                 </NavbarBrand>
             </Container>
             <NavLink style={{margin: 'auto 8px'}} href="profile"><Image src={defaultImage} className={styles.icon}/></NavLink>
-            <NavLink className={styles.NavLink} href="/" onClick={() => { localStorage.removeItem('role') }}>Log out</NavLink>
+            <NavLink className={styles.NavLink} href="/" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('role'); }}>Log out</NavLink>
         </Navbar>);
     }

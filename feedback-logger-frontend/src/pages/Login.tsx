@@ -4,162 +4,151 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 interface FormData {
-    email: string,
-    password: string,
-    password1: string
+    email: string;
+    password: string;
 }
 
 interface PassChange {
-    newPass: string,
-    repass: string
+    email: string;
+    newPass: string;
+    repass: string;
 }
 
 function Login() {
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState<FormData>({
-        email: '',
-        password: '',
-        password1: '',
-    });
-    const [adminUser, setAdminUser] = useState('admin@qu.edu');
-    const [adminPass, setAdminPass] = useState('password');
-    const [studentUser, setStudentUser] = useState('user@qu.edu');
-    const [studentPass, setStudentPass] = useState('password');
-    const [newPass, setNewPass] = useState<PassChange>({
-        newPass: '',
-        repass: ''
-    });
+    const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
+    const [newPass, setNewPass] = useState<PassChange>({ email: '', newPass: '', repass: '' });
     const [show, setShow] = useState(false);
 
-    // update form data to be submitted as user type in
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value} = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }))
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // live update on password to be submitted as user types
     const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+        const { name, value } = e.target;
+        setNewPass((prev) => ({ ...prev, [name]: value }));
+    };
 
-    setNewPass(prev => {
-        const updated = { ...prev, [name]: value };
-
-        return updated;
-    });
-};
-
-    const handlePassSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (newPass.newPass !== newPass.repass) {
-        alert("Passwords do not match");
-        return;
-    }
-
-    // Do not allow reusing the same password
-    if (newPass.newPass === adminPass || newPass.newPass === studentPass) {
-        alert("Password cannot be same as previous password!");
-        return;
-    }
-
-    // Update passwords (temporary logic)
-    setAdminPass(newPass.newPass);
-    setStudentPass(newPass.newPass);
-
-    alert("Password successfully changed!");
-
-    // Reset fields
-    setNewPass({ newPass: '', repass: '' });
-
-    setShow(false);
-};
-
-
-    // form submission logic
-    const handleSubmit = (e: FormEvent) => {
+    const handlePassSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log('Form data submitted: ', formData);
-        if (formData.email.toLowerCase() === adminUser && formData.password.toLowerCase() === adminPass) {
-            // mark role as admin
-            localStorage.setItem('role', 'admin')
-            navigate({ pathname: "main" })
-        } else if (formData.email.toLowerCase() === studentUser && formData.password.toLowerCase() === studentPass) {
-            // mark role as student
-            localStorage.setItem('role', 'student')
-            navigate({ pathname: "main" })
-        } else {
-            alert("Invalid login");
+
+        if (newPass.newPass !== newPass.repass) {
+            alert("Passwords do not match");
+            return;
         }
-    }
 
-    const handlePassword = () => {
-        setShow(true);
-    }
+        // Log in first to get a token for the change-password request
+        const loginRes = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: newPass.email, password: formData.password }),
+        });
 
-    const handleClose = () => {
-        setNewPass({ newPass: '', repass: '' });
-        setShow(false)
-  };
+        if (!loginRes.ok) {
+            alert("Could not verify identity. Please log in first.");
+            return;
+        }
 
-  return (
-    <>
-        <Container className="pageBody">
-            <h1>Login</h1>
-            <Form className="form" onSubmit={handleSubmit}>
-            <Form.Group className="mb-3 formGroup" controlId="formGroupEmail">
-                <Form.Label>Email address:</Form.Label>
-                <Form.Control className="formInput" type="email" name="email" placeholder="Enter email" value={formData.email} onChange={handleChange}/>
-            </Form.Group>
-            <Form.Group className="mb-3 formGroup" controlId="formGroupPassword">
-                <Form.Label>Password:</Form.Label>
-                <Form.Control className="formInput" type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange}/>
-            </Form.Group>
-            <Button className="button" variant="primary" type="submit">
-                Sign In
-            </Button>
-            </Form>
+        const { token } = await loginRes.json() as { token: string };
 
-            <Container className="passBody">
-                <h2>Forgot Password?: </h2>
-                <Button onClick={() => {handlePassword()}}>Change Password</Button>
+        const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ newPassword: newPass.newPass }),
+        });
+
+        const data = await res.json() as { message: string };
+
+        if (!res.ok) {
+            alert(data.message);
+            return;
+        }
+
+        alert("Password successfully changed!");
+        setNewPass({ email: '', newPass: '', repass: '' });
+        setShow(false);
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: formData.email, password: formData.password }),
+        });
+
+        if (!res.ok) {
+            alert("Invalid login");
+            return;
+        }
+
+        const data = await res.json() as { token: string; role: string };
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+        navigate({ pathname: "main" });
+    };
+
+    return (
+        <>
+            <Container className="pageBody">
+                <h1>Login</h1>
+                <Form className="form" onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3 formGroup" controlId="formGroupEmail">
+                        <Form.Label>Email address:</Form.Label>
+                        <Form.Control className="formInput" type="email" name="email" placeholder="Enter email" value={formData.email} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3 formGroup" controlId="formGroupPassword">
+                        <Form.Label>Password:</Form.Label>
+                        <Form.Control className="formInput" type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
+                    </Form.Group>
+                    <Button className="button" variant="primary" type="submit">
+                        Sign In
+                    </Button>
+                </Form>
+
+                <Container className="passBody">
+                    <h2>Forgot Password?:</h2>
+                    <Button onClick={() => setShow(true)}>Change Password</Button>
+                </Container>
+
+                <Modal show={show} onHide={() => { setNewPass({ email: '', newPass: '', repass: '' }); setShow(false); }} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Change Password</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handlePassSubmit}>
+                        <Modal.Body>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control type="email" name="email" placeholder="Enter Email" value={newPass.email} onChange={handlePasswordChange} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>New Password</Form.Label>
+                                <Form.Control type="password" name="newPass" placeholder="New Password" value={newPass.newPass} onChange={handlePasswordChange} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Re-enter Password</Form.Label>
+                                <Form.Control type="password" name="repass" placeholder="Re-enter Password" value={newPass.repass} onChange={handlePasswordChange} required />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => { setNewPass({ email: '', newPass: '', repass: '' }); setShow(false); }}>
+                                Close
+                            </Button>
+                            <Button type="submit" variant="primary">
+                                Save Changes
+                            </Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
             </Container>
-
-            <Modal show={show} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Give Feedback</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handlePassSubmit}>
-        <Modal.Body>
-            <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
-                <Form.Control as="input" type="email" name="email" placeholder="Enter Email" required/>
-            </Form.Group>
-          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-            <Form.Label>New Password</Form.Label>
-            <Form.Control as="input" type="password" name="newPass" placeholder="New Password" value={newPass.newPass} onChange={handlePasswordChange} required/>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="formGroupPassword">
-                <Form.Label>Re-enter Password:</Form.Label>
-                <Form.Control as="input" type="password" name="repass" placeholder="Re-enter Password" value={newPass.repass} onChange={handlePasswordChange} required/>
-            </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button type='submit' variant="primary">
-            Save Changes
-          </Button>
-        </Modal.Footer>
-        </Form>
-      </Modal>
-        </Container>
-    </>
-  );
+        </>
+    );
 }
 
 export default Login;

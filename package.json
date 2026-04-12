@@ -1,0 +1,24 @@
+{
+  "name": "term-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "app": "concurrently \"npm run dev --prefix feedback-logger-frontend\" \"npm start --prefix feedback-logger-backend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oscarlin0591/feedback-logger.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Oscarlin0591/feedback-logger/issues"
+  },
+  "homepage": "https://github.com/Oscarlin0591/feedback-logger#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
