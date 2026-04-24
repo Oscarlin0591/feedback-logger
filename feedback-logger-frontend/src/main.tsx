@@ -13,7 +13,7 @@ function LessonFeedbackRoute() {
   const params = useParams()
   const lessonId = params.lessonId ?? '1'
   const role = localStorage.getItem('role')
-  const mode = role === 'admin' ? 'teacher' : 'student'
+  const mode = role === 'professor' ? 'teacher' : 'student'
   return <LessonFeedbackPage mode={mode as 'teacher' | 'student'} lessonTitle={`Lesson ${lessonId}`} />
 }
 
