@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react"
-import { Card, CardBody, CardImg, CardText, CardTitle, Col, Row } from "react-bootstrap"
+import { Card, CardImg, CardText, CardTitle } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import styles from './LessonCard.module.css';
 

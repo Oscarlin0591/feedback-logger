@@ -1,15 +1,18 @@
-
-import React, { useState, type ChangeEvent, type FormEvent } from 'react'
-import { Row, Col, Button, Card, Modal, Container, InputGroup, Form } from 'react-bootstrap'
+import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
+import { Row, Col, Button, Card, Modal, Container, Form } from 'react-bootstrap'
 import { NavBar } from './NavBar'
 import { useNavigate } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
+import { apiGet, apiPost, apiPatch } from '../api'
+import type { ApiComment } from '../types'
 
 type Mode = 'teacher' | 'student'
 
 interface Props {
   mode: Mode
   lessonTitle: string
+  courseCode: string
+  lessonNumber: number
 }
 
 interface Feedback {
@@ -18,117 +21,111 @@ interface Feedback {
   comment: string
 }
 
-const sampleStudents: Feedback[] = [
-  { id: 's1', name: 'Student 1', comment: 'I think this lesson is too hard' },
-  { id: 's2', name: 'Student 2', comment: 'Could use more examples' },
-  { id: 's3', name: 'Student 3', comment: 'Loved the group activity' },
-]
-
-const sampleStudentOwn: Feedback[] = [
-{ id: '1', name: 'Feedback 1', comment: 'I think this lesson is too hard'}
-]
-
-const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
+const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle, courseCode, lessonNumber }) => {
   const isTeacher = mode === 'teacher'
-  const [show, setShow] = useState(false);
-  const [editShow, setEditShow] = useState(false);
-  const [feedback, setFeedback] = useState<Feedback>({
-    id: `${sampleStudentOwn.length + 1}`, name: `Feedback ${sampleStudentOwn.length + 1}`, comment: ''
-  })
-  const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>(sampleStudentOwn);
+  const commentsPath = `/courses/${courseCode}/lessons/${lessonNumber}/comments`
 
-  const [editId, setEditId] = useState<string | null>(null);
+  const [show, setShow] = useState(false)
+  const [editShow, setEditShow] = useState(false)
+  const [feedback, setFeedback] = useState<Feedback>({ id: '', name: '', comment: '' })
+  const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>([])
+  const [teacherFeedbacks, setTeacherFeedbacks] = useState<Feedback[]>([])
+  const [editId, setEditId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    apiGet<ApiComment[]>(commentsPath)
+      .then((data) => {
+        if (isTeacher) {
+          setTeacherFeedbacks(data.map((c) => ({
+            id: c.id,
+            name: c.authorName ?? 'Unknown',
+            comment: c.comment,
+          })))
+        } else {
+          setStudentFeedbacks(data.map((c, i) => ({
+            id: c.id,
+            name: `Feedback ${i + 1}`,
+            comment: c.comment,
+          })))
+        }
+      })
+      .catch(() => setError('Failed to load feedback'))
+      .finally(() => setLoading(false))
+  }, [commentsPath, isTeacher])
 
   const handleDownload = () => {
-    console.log('Download feedback clicked')
-
-    //Text Generation
-    var downloadableText = "";
-    for(let i = 0; i<sampleStudents.length; i++) {
-      downloadableText = downloadableText + "ID: " + sampleStudents[i].id + " | Student Name: " + sampleStudents[i].name + " | Comment: " + sampleStudents[i].comment + "\n"; 
+    let downloadableText = ''
+    for (const s of teacherFeedbacks) {
+      downloadableText += `ID: ${s.id} | Student Name: ${s.name} | Comment: ${s.comment}\n`
     }
-
-    //Actual download generation
-    const element = document.createElement("a");
-    const file = new Blob([downloadableText], {type: "text/plain"});
-    element.href=URL.createObjectURL(file);
-    element.download="exportedFeedback.txt";
-    document.body.appendChild(element);
-    element.click();
+    const element = document.createElement('a')
+    const file = new Blob([downloadableText], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = 'exportedFeedback.txt'
+    document.body.appendChild(element)
+    element.click()
   }
 
-  const handleGive = () => {
-    console.log('Give feedback clicked')
-    setShow(true);
-  }
+  const handleGive = () => setShow(true)
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setStudentFeedbacks(prev => [...prev, feedback])
-
-    // clears text area
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-
-    console.log(studentFeedbacks)
-    setShow(false);
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    try {
+      const newComment = await apiPost<ApiComment>(commentsPath, { comment: feedback.comment })
+      setStudentFeedbacks((prev) => [
+        ...prev,
+        { id: newComment.id, name: `Feedback ${prev.length + 1}`, comment: newComment.comment },
+      ])
+    } catch {
+      setError('Failed to submit feedback')
+    }
+    setFeedback((prev) => ({ ...prev, comment: '' }))
+    setShow(false)
   }
 
   const handleEdit = (id: string) => {
-    const selectedFeedback = studentFeedbacks.find(fb => fb.id === id);
-    if (!selectedFeedback) return;
-
-    setEditId(id);
-    setFeedback(selectedFeedback);
+    const selected = studentFeedbacks.find((fb) => fb.id === id)
+    if (!selected) return
+    setEditId(id)
+    setFeedback(selected)
     setEditShow(true)
-    console.log('Edit feedback', id)
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFeedback((prevData) => ({
-      ...prevData,
-      id: `${studentFeedbacks.length + 1}`,
-      name: `Feedback ${studentFeedbacks.length + 1}`,
-      [name]: value
-    }))
+    const { name, value } = e.target
+    setFeedback((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleClose = () => {
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
+    setFeedback((prev) => ({ ...prev, comment: '' }))
     setShow(false)
-  };
+  }
 
-  const handleEditSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setStudentFeedbacks(prev => prev.map(fb => 
-      fb.id === editId ? {...fb, comment: feedback.comment} : fb
-    ));
-
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-    setEditShow(false);
+  const handleEditSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!editId) return
+    try {
+      await apiPatch<ApiComment>(`${commentsPath}/${editId}`, { comment: feedback.comment })
+      setStudentFeedbacks((prev) =>
+        prev.map((fb) => (fb.id === editId ? { ...fb, comment: feedback.comment } : fb))
+      )
+    } catch {
+      setError('Failed to update feedback')
+    }
+    setFeedback((prev) => ({ ...prev, comment: '' }))
+    setEditShow(false)
   }
 
   const handleEditClose = () => {
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
+    setFeedback((prev) => ({ ...prev, comment: '' }))
     setEditShow(false)
-  };
+  }
 
   const navigate = useNavigate()
 
   const handleBack = () => {
-    // if there's history, go back; otherwise go to main
     if (window.history.length > 1) {
       navigate(-1)
     } else {
@@ -140,106 +137,98 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     <>
       <NavBar></NavBar>
       <Container className={styles.page}>
-        <h1 className={styles.header}>Feedback</h1>
+        <h1 className={styles.header}>{lessonTitle}</h1>
         <div className={styles.content}>
           <div className={styles.contentInner}>
-          <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
-          <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
+            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
+            <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
+            {loading && <p>Loading feedback...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
-          {isTeacher ? (
-            <div className={styles.feedbackList}>
-              {sampleStudents.map((s) => (
-                <Card key={s.id} className={`mb-3 ${styles.feedbackCard}`}>
-                  <Card.Body>
-                    <Row className="align-items-start">
-                      <Col xs="auto">
-                        <div className={styles.cardIcon}>{s.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
-                      </Col>
-                      <Col>
-                        <div className={styles.cardTitle}>{s.name}</div>
-                        <div className={styles.cardSubtitle}>{s.comment}</div>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              ))}
-
-              <Button variant="dark" className="w-100 mt-2" onClick={handleDownload}>
-                Download Feedback
-              </Button>
-            </div>
-          ) : (
-            <div className={styles.feedbackList}>
-              {studentFeedbacks.map((s) => (
-                <Card className={`${styles.feedbackCard}`}>
-                  <Card.Body>
-                    <div className="d-flex align-items-start justify-content-between">
-                      <div>
-                        <div className={styles.cardTitle}>{s.name}</div>
-                        <div className={styles.cardSubtitle}>{s.comment}</div>
+            {isTeacher ? (
+              <div className={styles.feedbackList}>
+                {teacherFeedbacks.map((s) => (
+                  <Card key={s.id} className={`mb-3 ${styles.feedbackCard}`}>
+                    <Card.Body>
+                      <Row className="align-items-start">
+                        <Col xs="auto">
+                          <div className={styles.cardIcon}>{s.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>
+                        </Col>
+                        <Col>
+                          <div className={styles.cardTitle}>{s.name}</div>
+                          <div className={styles.cardSubtitle}>{s.comment}</div>
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Card>
+                ))}
+                <Button variant="dark" className="w-100 mt-2" onClick={handleDownload}>
+                  Download Feedback
+                </Button>
+              </div>
+            ) : (
+              <div className={styles.feedbackList}>
+                {studentFeedbacks.map((s) => (
+                  <Card key={s.id} className={`${styles.feedbackCard}`}>
+                    <Card.Body>
+                      <div className="d-flex align-items-start justify-content-between">
+                        <div>
+                          <div className={styles.cardTitle}>{s.name}</div>
+                          <div className={styles.cardSubtitle}>{s.comment}</div>
+                        </div>
+                        <div>
+                          <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s.id)} aria-label="Edit">
+                            ✏️
+                          </Button>
+                        </div>
                       </div>
-
-                      <div>
-                        <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s.id)} aria-label="Edit">
-                          ✏️
-                        </Button>
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
-              ))}
-              <Button variant="dark" className="w-100 mt-2" onClick={handleGive}>
-                Give Feedback
-              </Button>
-            </div>
-          )}
+                    </Card.Body>
+                  </Card>
+                ))}
+                <Button variant="dark" className="w-100 mt-2" onClick={handleGive}>
+                  Give Feedback
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </Container>
 
-      {/* Feedback Model and submission logic */}
+      {/* Give Feedback modal */}
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Give Feedback</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSubmit}>
-        <Modal.Body>
-          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-            <Form.Label>What did you think of this lesson?</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required/>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button type='submit' variant="primary">
-            Save Changes
-          </Button>
-        </Modal.Footer>
+          <Modal.Body>
+            <Form.Group className="mb-3" controlId="feedbackTextarea">
+              <Form.Label>What did you think of this lesson?</Form.Label>
+              <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
+            <Button type="submit" variant="primary">Save Changes</Button>
+          </Modal.Footer>
         </Form>
       </Modal>
 
-      {/* Edit Feedback */}
+      {/* Edit Feedback modal */}
       <Modal show={editShow} onHide={handleEditClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Feedback</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleEditSubmit}>
-        <Modal.Body>
-          <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-            <Form.Label>Edit your feedback</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required></Form.Control>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleEditClose}>
-            Close
-          </Button>
-          <Button type='submit' variant="primary">
-            Save Changes
-          </Button>
-        </Modal.Footer>
+          <Modal.Body>
+            <Form.Group className="mb-3" controlId="editFeedbackTextarea">
+              <Form.Label>Edit your feedback</Form.Label>
+              <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleEditClose}>Close</Button>
+            <Button type="submit" variant="primary">Save Changes</Button>
+          </Modal.Footer>
         </Form>
       </Modal>
     </>

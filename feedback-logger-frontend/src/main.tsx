@@ -11,10 +11,18 @@ import Profile from './pages/Profile.tsx';
 
 function LessonFeedbackRoute() {
   const params = useParams()
+  const courseCode = params.id ?? ''
   const lessonId = params.lessonId ?? '1'
   const role = localStorage.getItem('role')
   const mode = role === 'admin' ? 'teacher' : 'student'
-  return <LessonFeedbackPage mode={mode as 'teacher' | 'student'} lessonTitle={`Lesson ${lessonId}`} />
+  return (
+    <LessonFeedbackPage
+      mode={mode as 'teacher' | 'student'}
+      lessonTitle={`Lesson ${lessonId}`}
+      courseCode={courseCode}
+      lessonNumber={parseInt(lessonId)}
+    />
+  )
 }
 
 createRoot(document.getElementById('root')!).render(

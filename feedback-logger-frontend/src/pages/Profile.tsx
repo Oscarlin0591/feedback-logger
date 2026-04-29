@@ -3,53 +3,26 @@ import { NavBar } from "../components/NavBar"
 import styles from "./Profile.module.css"
 import defaultImage from "../../public/default-avatar.jpg"
 import { useEffect, useState } from "react";
-
-interface User {
-    name: string,
-    classYear: number | null,
-    major: string,
-    department: string,
-    role: string,
-    email: string,
-    profileImage: string
-}
-
-// Decode the JWT payload without a library (base64 decode the middle segment)
-function decodeToken(token: string): Partial<User> | null {
-    try {
-        const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        return decoded as Partial<User>;
-    } catch {
-        return null;
-    }
-}
+import { apiGet, apiPut } from "../api";
+import type { ApiUser } from "../types";
 
 export default function Profile() {
     const [profileImage, setProfileImage] = useState<string>(defaultImage);
-    const [user, setUser] = useState<User>()
+    const [user, setUser] = useState<ApiUser | undefined>();
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState<User | null>(null);
+    const [editForm, setEditForm] = useState<ApiUser | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        const payload = decodeToken(token);
-        if (!payload) return;
-
-        const baseUser: User = {
-            name: payload.name ?? '',
-            email: payload.email ?? '',
-            role: payload.role ?? '',
-            classYear: null,
-            major: '',
-            department: '',
-            profileImage: defaultImage,
-        };
-
-        setUser(baseUser);
-        setEditForm(baseUser);
+        apiGet<ApiUser>('/profile')
+            .then((data) => {
+                setUser(data);
+                setEditForm(data);
+                if (data.profileImage && data.profileImage !== '/default-avatar.jpg') {
+                    setProfileImage(data.profileImage);
+                }
+            })
+            .catch(() => setError('Failed to load profile. Is the backend running?'));
     }, []);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,13 +39,23 @@ export default function Profile() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!editForm) return;
         const { name, value } = e.target;
-        setEditForm({ ...editForm, [name]: value });
+        setEditForm({ ...editForm, [name]: value } as ApiUser);
     };
 
     const saveChanges = () => {
         if (!editForm) return;
-        setUser(editForm);
-        setIsEditing(false);
+        apiPut<ApiUser>('/profile', {
+            name: editForm.name,
+            classYear: editForm.classYear !== null ? Number(editForm.classYear) : null,
+            major: editForm.major,
+            department: editForm.department,
+        })
+            .then((updated) => {
+                setUser(updated);
+                setEditForm(updated);
+                setIsEditing(false);
+            })
+            .catch(() => setError('Failed to save changes'));
     };
 
     return (
@@ -80,6 +63,7 @@ export default function Profile() {
             <NavBar />
 
             <Container className={styles.pageBody}>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
                 <section id="about">
                     <Row className="align-items-center flex-row-reverse">
                         <Col lg={6}>
@@ -88,7 +72,6 @@ export default function Profile() {
                                 <Col md={6}>
                                     <Form.Group className="mb-2">
                                         <Form.Label className="fw-bold">Name</Form.Label>
-                                        {/* editing ternary to display form when isEdit is true and p tag when false, overlays for all fields */}
                                         {isEditing ? (
                                             <Form.Control
                                                 name="name"
@@ -143,20 +126,11 @@ export default function Profile() {
 
                                     <Form.Group className="mb-2">
                                         <Form.Label className="fw-bold">Email</Form.Label>
-                                        {isEditing ? (
-                                            <Form.Control
-                                                name="email"
-                                                value={editForm?.email}
-                                                onChange={handleChange}
-                                            />
-                                        ) : (
-                                            <p>{user?.email}</p>
-                                        )}
+                                        <p>{user?.email}</p>
                                     </Form.Group>
                                 </Col>
                             </Row>
 
-                            {/* Save / Edit buttons */}
                             {isEditing ? (
                                 <Button className="mt-3" onClick={saveChanges}>
                                     Save Changes

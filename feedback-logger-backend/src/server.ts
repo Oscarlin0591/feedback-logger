@@ -1,18 +1,23 @@
+import 'dotenv/config';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
+import profileRouter from './routes/profile';
+import coursesRouter from './routes/courses';
+import type { AuthRequest, JwtPayload } from './types';
 
 const app = express();
-const PORT = 3000;
-const JWT_SECRET = 'feedback-logger-secret-key';
+const PORT = parseInt(process.env.PORT ?? '3000');
+const JWT_SECRET = process.env.JWT_SECRET ?? 'feedback-logger-secret-key';
 
 app.use(helmet());
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
-// In-memory user store (mirrors frontend users.json with hashed passwords)
+// In-memory user store — kept for auth compatibility until auth is migrated to DB
 const users = [
     {
         id: '1',
@@ -38,13 +43,8 @@ const users = [
     },
 ];
 
-// Extend Request to carry decoded JWT payload
-interface AuthRequest extends Request {
-    user?: { id: string; email: string; role: string; name: string };
-}
-
 // JWT auth middleware
-const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ message: 'No token provided' });
@@ -53,7 +53,7 @@ const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
 
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as AuthRequest['user'];
+        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         req.user = decoded;
         next();
     } catch {
@@ -106,6 +106,20 @@ app.post('/api/auth/change-password', authenticate, async (req: AuthRequest, res
     res.json({ message: 'Password changed successfully' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Backend server running on http://localhost:${PORT}`);
-});
+// Protected API routes
+app.use('/api/profile', authenticate, profileRouter);
+app.use('/api/courses', authenticate, coursesRouter);
+
+// Connect to MongoDB then start listening
+mongoose
+    .connect(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/feedback-logger')
+    .then(() => {
+        console.log('MongoDB connected');
+        app.listen(PORT, () => {
+            console.log(`Backend server running on http://localhost:${PORT}`);
+        });
+    })
+    .catch((err: unknown) => {
+        console.error('MongoDB connection failed:', err);
+        process.exit(1);
+    });
