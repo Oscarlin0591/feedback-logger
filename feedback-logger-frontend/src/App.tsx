@@ -1,14 +1,35 @@
+import { useEffect, useState } from 'react'
 import QULogo from './assets/qu-logo.png'
 // import './App.css'
-import { Container } from 'react-bootstrap'
+import { Container, Spinner } from 'react-bootstrap'
 import { CourseCard } from './components/CourseCard'
 import { NavBar } from './components/NavBar'
 
+interface Course {
+  _id: string;
+  courseCode: string;
+  title: string;
+  description?: string;
+  instructor: { name: string };
+}
+
 function App() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/auth/my-courses', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data: Course[]) => { setCourses(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
     <>
-    <NavBar></NavBar>
+    <NavBar/>
     <Container style={{display: 'flex', backgroundColor: 'black', height: '1px', width: '100%'}}></Container>
     <Container style={{
       display: "flex",
@@ -17,11 +38,24 @@ function App() {
       flexWrap: "wrap",
       justifyContent: 'space-between',
     }}>
-      {/* manually added four courses in CourseCard components */}
-        <CourseCard img={QULogo} courseTitle={'MA-229'} courseDescription={'Applied Statistics'} courseNum='MA-229' profName={'Professor Johnson'}/>
-        <CourseCard img={QULogo} courseTitle={'SER-325'} courseDescription={'Databases Systems'} courseNum='SER-325' profName={'Professor Shah'}/>
-        <CourseCard img={QULogo} courseTitle={'CSC-310'} courseDescription={'Operating Systems'} courseNum='CSC-310' profName={'Professor Blake'}/>
-        <CourseCard img={QULogo} courseTitle={'CSC-340'} courseDescription={'Full Stack Development'} courseNum='CSC-340' profName={'Professor ElKharboutly'}/>
+      {loading ? (
+        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+          <Spinner animation="border" />
+        </Container>
+      ) : courses.length === 0 ? (
+        <p className="text-muted mt-4">No courses found.</p>
+      ) : (
+        courses.map((c) => (
+          <CourseCard
+            key={c._id}
+            img={QULogo}
+            courseTitle={c.courseCode}
+            courseDescription={c.title}
+            courseNum={c.courseCode}
+            profName={c.instructor?.name ?? '—'}
+          />
+        ))
+      )}
      </Container>
     </>
   )

@@ -78,6 +78,20 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     }
 });
 
+// GET /my-courses — returns courses for the logged-in student or professor
+authRouter.get('/my-courses', authenticate, async (req: AuthRequest, res: Response) => {
+    const { id, role } = req.user!;
+    const Model: any = role === 'professor' ? Professor : Student;
+    const user = await Model.findById(id)
+        .populate({ path: 'courses', populate: { path: 'instructor', select: 'name' } })
+        .lean();
+    if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+    }
+    res.json(user.courses ?? []);
+});
+
 // POST /change-password — requires valid JWT
 authRouter.post('/change-password', authenticate, async (req: AuthRequest, res: Response) => {
     const { newPassword } = req.body as { newPassword: string };
