@@ -1,49 +1,67 @@
 import { useEffect, useState } from 'react'
 import QULogo from './assets/qu-logo.png'
-import { Container } from 'react-bootstrap'
+// import { Container } from 'react-bootstrap'
+// import './App.css'
+import { Container, Spinner } from 'react-bootstrap'
 import { CourseCard } from './components/CourseCard'
 import { NavBar } from './components/NavBar'
-import { apiGet } from './api'
-import type { ApiCourse } from './types'
+// import { apiGet } from './api'
+// import type { ApiCourse } from './types'
+
+interface Course {
+  _id: string;
+  courseCode: string;
+  title: string;
+  description?: string;
+  instructor: { name: string };
+}
 
 function App() {
-    const [courses, setCourses] = useState<ApiCourse[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        apiGet<ApiCourse[]>('/courses')
-            .then(setCourses)
-            .catch(() => setError('Failed to load courses. Is the backend running?'))
-            .finally(() => setLoading(false));
-    }, []);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/auth/my-courses', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data: Course[]) => { setCourses(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
-    return (
-        <>
-        <NavBar></NavBar>
-        <Container style={{display: 'flex', backgroundColor: 'black', height: '1px', width: '100%'}}></Container>
-        <Container style={{
-            display: "flex",
-            width: "1280px",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: 'space-between',
-        }}>
-            {loading && <p>Loading courses...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {courses.map((course) => (
-                <CourseCard
-                    key={course.courseCode}
-                    img={QULogo}
-                    courseTitle={course.title}
-                    courseDescription={course.description}
-                    courseNum={course.courseCode}
-                    profName={course.instructorName}
-                />
-            ))}
+  return (
+    <>
+    <NavBar/>
+    <Container style={{display: 'flex', backgroundColor: 'black', height: '1px', width: '100%'}}></Container>
+    <Container style={{
+      display: "flex",
+      width: "1280px",
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: 'space-between',
+    }}>
+      {loading ? (
+        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+          <Spinner animation="border" />
         </Container>
-        </>
-    )
+      ) : courses.length === 0 ? (
+        <p className="text-muted mt-4">No courses found.</p>
+      ) : (
+        courses.map((c) => (
+          <CourseCard
+            key={c._id}
+            img={QULogo}
+            courseTitle={c.courseCode}
+            courseDescription={c.title}
+            courseNum={c.courseCode}
+            profName={c.instructor?.name ?? '—'}
+          />
+        ))
+      )}
+     </Container>
+    </>
+  )
 }
 
 export default App;

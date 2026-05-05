@@ -8,6 +8,11 @@ import mongoose from 'mongoose';
 import profileRouter from './routes/profile';
 import coursesRouter from './routes/courses';
 import type { AuthRequest, JwtPayload } from './types';
+import passport from 'passport';
+import authRouter from './router/auth';
+import debugRouter from './router/debug';
+import Student from './model/Students';
+import Professor from './model/Professor';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000');
@@ -43,6 +48,8 @@ const users = [
         profileImage: '/default-avatar.jpg',
     },
 ];
+app.use('/api/auth', authRouter);
+app.use('/api/debug', debugRouter);
 
 // JWT auth middleware
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {

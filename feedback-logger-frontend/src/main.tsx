@@ -8,6 +8,7 @@ import CoursePage from './pages/CoursePage.tsx'
 import Login from './pages/Login.tsx'
 import LessonFeedbackPage from './components/LessonFeedbackPage'
 import Profile from './pages/Profile.tsx';
+import Debug from './pages/Debug.tsx';
 
 function LessonFeedbackRoute() {
   const params = useParams()
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="course/:id" element={<CoursePage />}></Route>
         <Route path="course/:id/lesson/:lessonId" element={<LessonFeedbackRoute />}></Route>
         <Route path="profile" element={<Profile />}></Route>
+        <Route path="debug" element={<Debug />}></Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>,

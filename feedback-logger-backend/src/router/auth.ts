@@ -33,10 +33,13 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
 const authRouter = Router();
 
-// POST /login — { email, password, role: 'student' | 'professor' }
-authRouter.post('/login', (req: Request, res: Response, next: NextFunction) => {
-    const { role } = req.body as { role?: string };
-    const strategy = role === 'professor' ? 'professor' : 'student';
+// POST /login — { email, password } — role is resolved from the database
+authRouter.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body as { email?: string };
+
+    // Determine which collection the account lives in
+    const studentExists = email ? await Student.exists({ email: email.toLowerCase() }) : null;
+    const strategy = studentExists ? 'student' : 'professor';
 
     passport.authenticate(strategy, { session: false }, (err: Error | null, user: any, info: any) => {
         if (err) return next(err);
@@ -49,6 +52,44 @@ authRouter.post('/login', (req: Request, res: Response, next: NextFunction) => {
         );
         res.json({ token, role: strategy, name: user.name });
     })(req, res, next);
+});
+
+// POST /register — { name, email, password, role: 'student' | 'professor' }
+authRouter.post('/register', async (req: Request, res: Response) => {
+    const { name, email, password, role } = req.body as { name?: string; email?: string; password?: string; role?: string };
+
+    if (!name || !email || !password) {
+        res.status(400).json({ message: 'Name, email, and password are required' });
+        return;
+    }
+
+    const Model: any = role === 'professor' ? Professor : Student;
+
+    try {
+        const user = new Model({ name, email });
+        await (Model as any).register(user, password);
+        res.status(201).json({ message: 'Account created successfully' });
+    } catch (err: any) {
+        if (err.name === 'UserExistsError') {
+            res.status(409).json({ message: 'An account with that email already exists' });
+        } else {
+            res.status(500).json({ message: err.message ?? 'Registration failed' });
+        }
+    }
+});
+
+// GET /my-courses — returns courses for the logged-in student or professor
+authRouter.get('/my-courses', authenticate, async (req: AuthRequest, res: Response) => {
+    const { id, role } = req.user!;
+    const Model: any = role === 'professor' ? Professor : Student;
+    const user = await Model.findById(id)
+        .populate({ path: 'courses', populate: { path: 'instructor', select: 'name' } })
+        .lean();
+    if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+    }
+    res.json(user.courses ?? []);
 });
 
 // POST /change-password — requires valid JWT
