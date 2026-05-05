@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { Row, Col, Button, Card, Modal, Container, InputGroup, Form } from 'react-bootstrap'
+import { Row, Col, Button, Card, Modal, Container, Form } from 'react-bootstrap'
 import { NavBar } from './NavBar'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
@@ -10,6 +10,8 @@ type Mode = 'teacher' | 'student'
 interface Props {
   mode: Mode
   lessonTitle: string
+  courseCode: string
+  lessonNumber: number
 }
 
 interface Feedback {
@@ -52,10 +54,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     element.click();
   }
 
-  const handleGive = () => {
-    console.log('Give feedback clicked')
-    setShow(true);
-  }
+  const handleGive = () => setShow(true)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -114,7 +113,6 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   const navigate = useNavigate()
 
   const handleBack = () => {
-    // if there's history, go back; otherwise go to main
     if (window.history.length > 1) {
       navigate(-1)
     } else {
@@ -126,11 +124,11 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     <>
       <NavBar></NavBar>
       <Container className={styles.page}>
-        <h1 className={styles.header}>Feedback</h1>
+        <h1 className={styles.header}>{lessonTitle}</h1>
         <div className={styles.content}>
           <div className={styles.contentInner}>
-          <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
-          <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
+            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
+            <h2 className={styles.sectionTitle}>{isTeacher ? 'Student Feedback' : 'Your Feedback'}</h2>
 
           {isTeacher ? (
             <div className={styles.feedbackList}>
@@ -186,7 +184,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         </div>
       </Container>
 
-      {/* Feedback Model and submission logic */}
+      {/* Give Feedback modal */}
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Give Feedback</Modal.Title>
@@ -209,7 +207,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         </Form>
       </Modal>
 
-      {/* Edit Feedback */}
+      {/* Edit Feedback modal */}
       <Modal show={editShow} onHide={handleEditClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Feedback</Modal.Title>

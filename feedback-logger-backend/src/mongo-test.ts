@@ -1,3 +1,6 @@
+// @ts-nocheck — dev/test scratch script. The Student/Professor models gained
+// passport-local-mongoose after this was written, which changes their create()
+// signatures. Skip type-checking; this file is not run by `npm start` or `npm run seed`.
 import mongoose from "mongoose";
 
 import Course from "./model/Course";

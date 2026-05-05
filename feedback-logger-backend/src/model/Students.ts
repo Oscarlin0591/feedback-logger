@@ -40,7 +40,10 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-studentSchema.plugin(passportLocalMongoose.default, { usernameField: 'email', saltlen: 32 });
+// passport-local-mongoose is CJS; the actual plugin function lives at `.default` at runtime
+// even though the TS types claim the module export itself is the function.
+const plmPlugin = (passportLocalMongoose as any).default ?? passportLocalMongoose;
+studentSchema.plugin(plmPlugin, { usernameField: 'email', saltlen: 32 });
 
 const Student = mongoose.model("Student", studentSchema);
 

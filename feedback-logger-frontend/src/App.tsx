@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import QULogo from './assets/qu-logo.png'
-// import './App.css'
 import { Container, Spinner } from 'react-bootstrap'
 import { CourseCard } from './components/CourseCard'
 import { NavBar } from './components/NavBar'

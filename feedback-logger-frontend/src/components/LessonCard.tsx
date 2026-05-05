@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react"
-import { Card, CardBody, CardImg, CardText, CardTitle, Col, Row } from "react-bootstrap"
+import { Card, CardImg, CardText, CardTitle } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import styles from './LessonCard.module.css';
 
@@ -17,7 +16,7 @@ export function LessonCard(props : {
 
     return (
         <>
-            <Card className={styles.Card} onClick={() => navigate(`${courseSegment}/lesson/${props.lessonID+1}`)}>
+            <Card className={styles.Card} onClick={() => navigate(`${courseSegment}/lesson/${props.lessonID}`)}>
                 <div className={styles.lessonRow}>
                     <CardImg src={props.img} className={styles.lessonImg} />
                     <div className={styles.textArea}>

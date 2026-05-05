@@ -1,4 +1,3 @@
-import { /*useEffect, useState*/ } from "react";
 import { NavBar } from "../components/NavBar";
 import { Button, Container } from "react-bootstrap";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -18,7 +17,7 @@ export default function CoursePage() {
 
     const weeks = Array.from({ length: 12 }, (_, i) => ({
         week: i + 1,
-        lessons: [i * 2, i * 2 + 1],
+        lessons: [i * 2 + 1, i * 2 + 2],
     }));
 
     const navigate = useNavigate();
@@ -56,8 +55,8 @@ export default function CoursePage() {
                                     key={lessonId}
                                     courseId={courseId}
                                     img={QULogo}
-                                    lessonTitle={`Lesson ${(lessonId) + 1}`}
-                                    lessonDesc={`This is Lesson ${(lessonId) + 1}`}
+                                    lessonTitle={`Lesson ${lessonId}`}
+                                    lessonDesc={`This is Lesson ${lessonId}`}
                                     lessonID={lessonId}
                                     isLocked={w.week > curWeek}
                                 />

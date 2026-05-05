@@ -29,7 +29,7 @@ export const NavBar = () => {
                 BOB's Feedback Logger
                 </NavbarBrand>
             </Container>
-            <NavLink style={{margin: 'auto 8px', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit'}} href="profile">
+            <NavLink style={{margin: 'auto 8px', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit'}} href="/profile">
                 <Image src={avatar} className={styles.icon}/>
                 {name && <span style={{fontWeight: 500}}>{name}</span>}
             </NavLink>

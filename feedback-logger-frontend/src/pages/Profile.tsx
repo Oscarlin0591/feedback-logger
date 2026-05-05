@@ -18,6 +18,7 @@ export default function Profile() {
     const [user, setUser] = useState<User>()
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<User | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -79,6 +80,7 @@ export default function Profile() {
             <NavBar />
 
             <Container className={styles.pageBody}>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
                 <section id="about">
                     <Row className="align-items-center flex-row-reverse">
                         <Col lg={6}>
@@ -87,7 +89,6 @@ export default function Profile() {
                                 <Col md={6}>
                                     <Form.Group className="mb-2">
                                         <Form.Label className="fw-bold">Name</Form.Label>
-                                        {/* editing ternary to display form when isEdit is true and p tag when false, overlays for all fields */}
                                         {isEditing ? (
                                             <Form.Control
                                                 name="name"
@@ -142,20 +143,11 @@ export default function Profile() {
 
                                     <Form.Group className="mb-2">
                                         <Form.Label className="fw-bold">Email</Form.Label>
-                                        {isEditing ? (
-                                            <Form.Control
-                                                name="email"
-                                                value={editForm?.email}
-                                                onChange={handleChange}
-                                            />
-                                        ) : (
-                                            <p>{user?.email}</p>
-                                        )}
+                                        <p>{user?.email}</p>
                                     </Form.Group>
                                 </Col>
                             </Row>
 
-                            {/* Save / Edit buttons */}
                             {isEditing ? (
                                 <Button className="mt-3" onClick={saveChanges}>
                                     Save Changes
