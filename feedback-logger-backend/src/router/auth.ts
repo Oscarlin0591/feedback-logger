@@ -3,19 +3,16 @@ import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import Student from '../model/Students';
 import Professor from '../model/Professor';
+import type { JwtPayload } from '../types';
 
-export const JWT_SECRET = process.env.JWT_SECRET!;
+export const JWT_SECRET = process.env.JWT_SECRET ?? 'feedback-logger-secret-key';
 
 // Named strategies backed by passport-local-mongoose, keyed on email
 passport.use('student', (Student as any).createStrategy());
 passport.use('professor', (Professor as any).createStrategy());
 
-export interface AuthRequest extends Request {
-    user?: { id: string; email: string; role: string; name: string };
-}
-
-// JWT middleware — protects downstream routes
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+// JWT middleware — protects downstream routes. req.user is typed via global augmentation in ../types.
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ message: 'No token provided' });
@@ -23,7 +20,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     }
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as AuthRequest['user'];
+        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         req.user = decoded;
         next();
     } catch {
@@ -79,7 +76,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 });
 
 // GET /my-courses — returns courses for the logged-in student or professor
-authRouter.get('/my-courses', authenticate, async (req: AuthRequest, res: Response) => {
+authRouter.get('/my-courses', authenticate, async (req: Request, res: Response) => {
     const { id, role } = req.user!;
     const Model: any = role === 'professor' ? Professor : Student;
     const user = await Model.findById(id)
@@ -93,7 +90,7 @@ authRouter.get('/my-courses', authenticate, async (req: AuthRequest, res: Respon
 });
 
 // POST /change-password — requires valid JWT
-authRouter.post('/change-password', authenticate, async (req: AuthRequest, res: Response) => {
+authRouter.post('/change-password', authenticate, async (req: Request, res: Response) => {
     const { newPassword } = req.body as { newPassword: string };
     const { id, role } = req.user!;
 

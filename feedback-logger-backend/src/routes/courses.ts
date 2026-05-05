@@ -1,14 +1,16 @@
-import { Router, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import Course from '../model/Course';
 import Lesson from '../model/Lesson';
 import Comment from '../model/Comment';
 import Student from '../model/Students';
-import type { AuthRequest } from '../types';
 
 const router = Router();
 
+// Roles allowed to see all comments + author names (teacher view)
+const isTeacherRole = (role: string | undefined) => role === 'professor' || role === 'admin';
+
 // GET /api/courses
-router.get('/', async (_req: AuthRequest, res: Response): Promise<void> => {
+router.get('/', async (_req: Request, res: Response): Promise<void> => {
     const courses = await Course.find()
         .populate<{ instructor: { name: string } | null }>('instructor', 'name')
         .sort({ courseCode: 1 });
@@ -25,7 +27,7 @@ router.get('/', async (_req: AuthRequest, res: Response): Promise<void> => {
 });
 
 // GET /api/courses/:courseCode/lessons
-router.get('/:courseCode/lessons', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:courseCode/lessons', async (req: Request, res: Response): Promise<void> => {
     const courseCode = req.params.courseCode as string;
 
     const course = await Course.findOne({ courseCode: courseCode.toUpperCase() });
@@ -50,8 +52,8 @@ router.get('/:courseCode/lessons', async (req: AuthRequest, res: Response): Prom
 });
 
 // GET /api/courses/:courseCode/lessons/:lessonNumber/comments
-// Admin: all comments with author names. Student: own comments only.
-router.get('/:courseCode/lessons/:lessonNumber/comments', async (req: AuthRequest, res: Response): Promise<void> => {
+// Teacher (professor/admin): all comments with author names. Student: own comments only.
+router.get('/:courseCode/lessons/:lessonNumber/comments', async (req: Request, res: Response): Promise<void> => {
     const courseCode = req.params.courseCode as string;
     const lessonNumber = req.params.lessonNumber as string;
 
@@ -61,7 +63,7 @@ router.get('/:courseCode/lessons/:lessonNumber/comments', async (req: AuthReques
     const lesson = await Lesson.findOne({ course: course._id, lessonNumber: parseInt(lessonNumber) });
     if (!lesson) { res.status(404).json({ message: 'Lesson not found' }); return; }
 
-    if (req.user!.role === 'admin') {
+    if (isTeacherRole(req.user!.role)) {
         const comments = await Comment.find({ lesson: lesson._id })
             .populate<{ author: { name: string } | null }>('author', 'name')
             .sort({ createdAt: 1 });
@@ -94,7 +96,7 @@ router.get('/:courseCode/lessons/:lessonNumber/comments', async (req: AuthReques
 });
 
 // POST /api/courses/:courseCode/lessons/:lessonNumber/comments
-router.post('/:courseCode/lessons/:lessonNumber/comments', async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/:courseCode/lessons/:lessonNumber/comments', async (req: Request, res: Response): Promise<void> => {
     if (req.user!.role !== 'student') {
         res.status(403).json({ message: 'Only students can submit feedback' });
         return;
@@ -139,7 +141,7 @@ router.post('/:courseCode/lessons/:lessonNumber/comments', async (req: AuthReque
 });
 
 // PATCH /api/courses/:courseCode/lessons/:lessonNumber/comments/:commentId
-router.patch('/:courseCode/lessons/:lessonNumber/comments/:commentId', async (req: AuthRequest, res: Response): Promise<void> => {
+router.patch('/:courseCode/lessons/:lessonNumber/comments/:commentId', async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId as string;
     const { comment } = req.body as { comment: string };
 

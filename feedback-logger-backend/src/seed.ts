@@ -1,16 +1,30 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 import Professor from './model/Professor';
 import Student from './model/Students';
 import Course from './model/Course';
 import Lesson from './model/Lesson';
 
+// Upsert helper that uses passport-local-mongoose's `register()` so the seeded
+// user can actually log in (sets salt + hash, not a plain `password` field).
+async function upsertUser(Model: any, data: { email: string; name: string; [k: string]: unknown }, password: string) {
+    const existing = await Model.findOne({ email: data.email });
+    if (!existing) {
+        const user = new Model(data);
+        await Model.register(user, password);
+        console.log(`Created ${Model.modelName.toLowerCase()}: ${data.email}`);
+        return user;
+    }
+    // Update non-credential fields without touching salt/hash
+    Object.assign(existing, data);
+    await existing.save();
+    console.log(`Updated ${Model.modelName.toLowerCase()}: ${data.email}`);
+    return existing;
+}
+
 async function seed() {
     await mongoose.connect(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/feedback-logger');
     console.log('Connected to MongoDB');
-
-    const hashedPassword = await bcrypt.hash('password', 10);
 
     // ── Professors (course instructors) ──────────────────────────────────────
     const professorData = [
@@ -22,44 +36,27 @@ async function seed() {
 
     const professors = [];
     for (const data of professorData) {
-        const prof = await Professor.findOneAndUpdate(
-            { email: data.email },
-            { ...data, password: hashedPassword },
-            { upsert: true, new: true }
-        );
-        professors.push(prof!);
+        const prof = await upsertUser(Professor, data, 'password');
+        professors.push(prof);
     }
-    console.log(`Seeded ${professors.length} course professors`);
 
-    // ── Admin user (stored as Professor so GET /api/profile finds them) ───────
-    await Professor.findOneAndUpdate(
-        { email: 'admin@qu.edu' },
-        {
-            name: 'Alice Admin',
-            email: 'admin@qu.edu',
-            password: hashedPassword,
-            major: 'Computer Science Ph.D',
-            department: 'School of Computing and Engineering',
-            classYear: 2006,
-        },
-        { upsert: true, new: true }
-    );
-    console.log('Seeded admin user (admin@qu.edu)');
+    // ── Admin user (stored as Professor so role 'professor' grants teacher view) ──
+    await upsertUser(Professor, {
+        name: 'Alice Admin',
+        email: 'admin@qu.edu',
+        major: 'Computer Science Ph.D',
+        department: 'School of Computing and Engineering',
+        classYear: 2006,
+    }, 'password');
 
     // ── Student user ─────────────────────────────────────────────────────────
-    await Student.findOneAndUpdate(
-        { email: 'user@qu.edu' },
-        {
-            name: 'John User',
-            email: 'user@qu.edu',
-            password: hashedPassword,
-            major: 'Software Engineer',
-            department: 'School of Computing and Engineering',
-            classYear: 2027,
-        },
-        { upsert: true, new: true }
-    );
-    console.log('Seeded student user (user@qu.edu)');
+    const studentDoc = await upsertUser(Student, {
+        name: 'John User',
+        email: 'user@qu.edu',
+        major: 'Software Engineer',
+        department: 'School of Computing and Engineering',
+        classYear: 2027,
+    }, 'password');
 
     // ── Courses + 24 lessons each ─────────────────────────────────────────────
     const courseData = [
@@ -68,6 +65,8 @@ async function seed() {
         { title: 'CSC-310', courseCode: 'CSC-310', description: 'Operating Systems',   professorIdx: 2 },
         { title: 'CSC-340', courseCode: 'CSC-340', description: 'Full Stack Development', professorIdx: 3 },
     ];
+
+    const courseIds: mongoose.Types.ObjectId[] = [];
 
     for (const data of courseData) {
         const course = await Course.findOneAndUpdate(
@@ -98,11 +97,16 @@ async function seed() {
 
         // Keep course.lessons in sync with the 24 upserted lessons
         await Course.updateOne({ _id: course!._id }, { $set: { lessons: lessonIds } });
+        courseIds.push(course!._id);
         console.log(`Seeded course ${data.courseCode} with 24 lessons`);
     }
 
+    // Auto-enroll the seeded student in all 4 courses so /api/auth/my-courses returns data
+    await Student.updateOne({ _id: studentDoc._id }, { $set: { courses: courseIds } });
+    console.log('Enrolled seed student in all courses');
+
     await mongoose.disconnect();
-    console.log('\nSeeding complete! Users: user@qu.edu / admin@qu.edu (password: "password")');
+    console.log('\nSeeding complete! Login with user@qu.edu or admin@qu.edu (password: "password")');
 }
 
 seed().catch((err: unknown) => {

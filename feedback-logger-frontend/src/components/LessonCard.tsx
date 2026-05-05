@@ -16,7 +16,7 @@ export function LessonCard(props : {
 
     return (
         <>
-            <Card className={styles.Card} onClick={() => navigate(`${courseSegment}/lesson/${props.lessonID+1}`)}>
+            <Card className={styles.Card} onClick={() => navigate(`${courseSegment}/lesson/${props.lessonID}`)}>
                 <div className={styles.lessonRow}>
                     <CardImg src={props.img} className={styles.lessonImg} />
                     <div className={styles.textArea}>
