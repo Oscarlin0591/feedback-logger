@@ -16,6 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET ?? 'feedback-logger-secret-key';
 app.use(helmet());
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
+// app.use(passport.initialize());
 
 // In-memory user store — kept for auth compatibility until auth is migrated to DB
 const users = [

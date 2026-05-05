@@ -6,19 +6,21 @@ import "./Login.css";
 interface FormData {
     email: string;
     password: string;
+    role: 'student' | 'professor';
 }
 
 interface PassChange {
     email: string;
     newPass: string;
     repass: string;
+    role: 'student' | 'professor';
 }
 
 function Login() {
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
-    const [newPass, setNewPass] = useState<PassChange>({ email: '', newPass: '', repass: '' });
+    const [formData, setFormData] = useState<FormData>({ email: '', password: '', role: 'student' });
+    const [newPass, setNewPass] = useState<PassChange>({ email: '', newPass: '', repass: '', role: 'student' });
     const [show, setShow] = useState(false);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +45,7 @@ function Login() {
         const loginRes = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: newPass.email, password: formData.password }),
+            body: JSON.stringify({ email: newPass.email, password: formData.password, role: newPass.role }),
         });
 
         if (!loginRes.ok) {
@@ -80,7 +82,7 @@ function Login() {
         const res = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: formData.email, password: formData.password }),
+            body: JSON.stringify({ email: formData.email, password: formData.password, role: formData.role }),
         });
 
         if (!res.ok) {
@@ -107,6 +109,13 @@ function Login() {
                         <Form.Label>Password:</Form.Label>
                         <Form.Control className="formInput" type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
                     </Form.Group>
+                    <Form.Group className="mb-3 formGroup" controlId="formGroupRole">
+                        <Form.Label>Role:</Form.Label>
+                        <Form.Select name="role" value={formData.role} onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value as FormData['role'] }))}>
+                            <option value="student">Student</option>
+                            <option value="professor">Professor</option>
+                        </Form.Select>
+                    </Form.Group>
                     <Button className="button" variant="primary" type="submit">
                         Sign In
                     </Button>
@@ -117,7 +126,7 @@ function Login() {
                     <Button onClick={() => setShow(true)}>Change Password</Button>
                 </Container>
 
-                <Modal show={show} onHide={() => { setNewPass({ email: '', newPass: '', repass: '' }); setShow(false); }} centered>
+                <Modal show={show} onHide={() => { setNewPass({ email: '', newPass: '', repass: '', role: 'student' }); setShow(false); }} centered>
                     <Modal.Header closeButton>
                         <Modal.Title>Change Password</Modal.Title>
                     </Modal.Header>
@@ -135,9 +144,16 @@ function Login() {
                                 <Form.Label>Re-enter Password</Form.Label>
                                 <Form.Control type="password" name="repass" placeholder="Re-enter Password" value={newPass.repass} onChange={handlePasswordChange} required />
                             </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Role</Form.Label>
+                                <Form.Select name="role" value={newPass.role} onChange={(e) => setNewPass((prev) => ({ ...prev, role: e.target.value as PassChange['role'] }))}>
+                                    <option value="student">Student</option>
+                                    <option value="professor">Professor</option>
+                                </Form.Select>
+                            </Form.Group>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => { setNewPass({ email: '', newPass: '', repass: '' }); setShow(false); }}>
+                            <Button variant="secondary" onClick={() => { setNewPass({ email: '', newPass: '', repass: '', role: 'student' }); setShow(false); }}>
                                 Close
                             </Button>
                             <Button type="submit" variant="primary">

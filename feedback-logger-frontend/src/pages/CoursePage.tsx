@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { /*useEffect, useState*/ } from "react";
 import { NavBar } from "../components/NavBar";
 import { Button, Container } from "react-bootstrap";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -14,6 +14,7 @@ export default function CoursePage() {
     const { courseTitle } = location.state || {};
     const { profName } = location.state || {};
     const { courseNum } = location.state || {};
+<<<<<<< HEAD
     const { id } = useParams(); // course code from URL, e.g. "MA-229"
 
     const [lessons, setLessons] = useState<ApiLesson[]>([]);
@@ -45,6 +46,16 @@ export default function CoursePage() {
     }, []);
 
     const maxWeek = Math.ceil(currentLesson / 2);
+=======
+    const curWeek = 3;
+
+    const { id: courseId } = useParams();
+
+    const weeks = Array.from({ length: 12 }, (_, i) => ({
+        week: i + 1,
+        lessons: [i * 2, i * 2 + 1],
+    }));
+>>>>>>> a749c465efc6bf7944204c6dbca46c3841016cde
 
     const navigate = useNavigate();
 
@@ -58,22 +69,28 @@ export default function CoursePage() {
 
     return (
         <>
-            <NavBar></NavBar>
-            <Button variant="link" className={`${styles.backButton}`} onClick={handleBack} aria-label="Go back">←</Button>
-            <Container style={{display: 'flex', backgroundColor: 'black', height: '1px', width: '100%'}}></Container>
+            <NavBar />
+            <Button variant="link" className={styles.backButton} onClick={handleBack} aria-label="Go back">←</Button>
+            <Container style={{ display: 'flex', backgroundColor: 'black', height: '1px', width: '100%' }} />
             <Container style={{
-                display: "flex",
-                width: "1280px",
-                flexDirection: "column",
-                margin: "0 auto",
+                display: 'flex',
+                width: '1280px',
+                flexDirection: 'column',
+                margin: '0 auto',
                 justifyContent: 'space-between',
             }}>
+<<<<<<< HEAD
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left'}}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignContent: 'left'}}>
+=======
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignContent: 'left' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignContent: 'left' }}>
+>>>>>>> a749c465efc6bf7944204c6dbca46c3841016cde
                         <div className={styles.courseTitle}>{courseTitle}</div>
                         <div className={styles.smallText}>{profName}</div>
                         <div className={styles.smallText}>{courseNum}</div>
                     </div>
+<<<<<<< HEAD
                     {loading && <p>Loading lessons...</p>}
                     {error && <p style={{ color: 'red' }}>{error}</p>}
                     {weeks
@@ -93,8 +110,29 @@ export default function CoursePage() {
                                 ))}
                             </WeekCard>
                         ))}
+=======
+                    {weeks.map((w) => (
+                        <WeekCard key={w.week} weekTitle={`Week ${w.week}`}>
+                            {w.lessons.map((lessonId) => (
+                                <LessonCard
+                                    key={lessonId}
+                                    courseId={courseId}
+                                    img={QULogo}
+                                    lessonTitle={`Lesson ${(lessonId) + 1}`}
+                                    lessonDesc={`This is Lesson ${(lessonId) + 1}`}
+                                    lessonID={lessonId}
+                                    isLocked={w.week > curWeek}
+                                />
+                            ))}
+                        </WeekCard>
+                    ))}
+>>>>>>> a749c465efc6bf7944204c6dbca46c3841016cde
                 </div>
             </Container>
         </>
     );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a749c465efc6bf7944204c6dbca46c3841016cde

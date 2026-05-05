@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import passportLocalMongoose from "passport-local-mongoose";
 
 const professorSchema = new mongoose.Schema(
   {
@@ -13,10 +14,6 @@ const professorSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-    },
-    password: {
-      type: String,
-      required: true,
     },
     courses: [
       {
@@ -42,6 +39,8 @@ const professorSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+professorSchema.plugin(passportLocalMongoose.default, { usernameField: 'email', saltlen: 32 });
 
 const Professor = mongoose.model("Professor", professorSchema);
 
