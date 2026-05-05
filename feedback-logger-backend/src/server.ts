@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import mongoose from 'mongoose';
 import passport from 'passport';
 import authRouter from './router/auth';
+import debugRouter from './router/debug';
 import Student from './model/Students';
 import Professor from './model/Professor';
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/api/auth', authRouter);
+app.use('/api/debug', debugRouter);
 
 mongoose
     .connect(process.env.MONGODB_URI!)
