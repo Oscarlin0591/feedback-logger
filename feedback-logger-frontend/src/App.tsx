@@ -19,7 +19,7 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('/api/auth/my-courses', {
+    fetch('/api/auth/courses', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())

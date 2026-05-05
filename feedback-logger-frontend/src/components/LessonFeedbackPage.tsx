@@ -1,8 +1,8 @@
 
-import React, { useState, type ChangeEvent, type FormEvent } from 'react'
+import React, { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Row, Col, Button, Card, Modal, Container, InputGroup, Form } from 'react-bootstrap'
 import { NavBar } from './NavBar'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import styles from './LessonFeedbackPage.module.css'
 
 type Mode = 'teacher' | 'student'
@@ -13,46 +13,41 @@ interface Props {
 }
 
 interface Feedback {
-  id: string
-  name: string
+  _id: string
   comment: string
+  author: { _id: string; name: string }
 }
-
-const sampleStudents: Feedback[] = [
-  { id: 's1', name: 'Student 1', comment: 'I think this lesson is too hard' },
-  { id: 's2', name: 'Student 2', comment: 'Could use more examples' },
-  { id: 's3', name: 'Student 3', comment: 'Loved the group activity' },
-]
-
-const sampleStudentOwn: Feedback[] = [
-{ id: '1', name: 'Feedback 1', comment: 'I think this lesson is too hard'}
-]
 
 const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
   const isTeacher = mode === 'teacher'
+  const { id: courseCode, lessonId } = useParams<{ id: string; lessonId: string }>();
   const [show, setShow] = useState(false);
   const [editShow, setEditShow] = useState(false);
-  const [feedback, setFeedback] = useState<Feedback>({
-    id: `${sampleStudentOwn.length + 1}`, name: `Feedback ${sampleStudentOwn.length + 1}`, comment: ''
-  })
-  const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>(sampleStudentOwn);
+  const [commentText, setCommentText] = useState('');
+  const [studentFeedbacks, setStudentFeedbacks] = useState<Feedback[]>([]);
 
   const [editId, setEditId] = useState<string | null>(null);
 
+  const apiBase = `/api/comments/${courseCode}/${lessonId}`;
+  const token = localStorage.getItem('token');
+  const authHeader = { Authorization: `Bearer ${token}` };
+
+  useEffect(() => {
+    fetch(apiBase, { headers: authHeader })
+      .then((r) => r.json())
+      .then((data: Feedback[]) => setStudentFeedbacks(data))
+      .catch(console.error);
+  }, [apiBase]);
+
   const handleDownload = () => {
-    console.log('Download feedback clicked')
+    const downloadableText = studentFeedbacks
+      .map((s) => `Student: ${s.author.name} | Comment: ${s.comment}`)
+      .join('\n');
 
-    //Text Generation
-    var downloadableText = "";
-    for(let i = 0; i<sampleStudents.length; i++) {
-      downloadableText = downloadableText + "ID: " + sampleStudents[i].id + " | Student Name: " + sampleStudents[i].name + " | Comment: " + sampleStudents[i].comment + "\n"; 
-    }
-
-    //Actual download generation
     const element = document.createElement("a");
     const file = new Blob([downloadableText], {type: "text/plain"});
-    element.href=URL.createObjectURL(file);
-    element.download="exportedFeedback.txt";
+    element.href = URL.createObjectURL(file);
+    element.download = "exportedFeedback.txt";
     document.body.appendChild(element);
     element.click();
   }
@@ -62,67 +57,58 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
     setShow(true);
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setStudentFeedbacks(prev => [...prev, feedback])
-
-    // clears text area
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-
-    console.log(studentFeedbacks)
-    setShow(false);
+    const res = await fetch(apiBase, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+      body: JSON.stringify({ comment: commentText }),
+    });
+    if (res.ok) {
+      const created: Feedback = await res.json();
+      setStudentFeedbacks(prev => [...prev, created]);
+      setCommentText('');
+      setShow(false);
+    }
   }
 
-  const handleEdit = (id: string) => {
-    const selectedFeedback = studentFeedbacks.find(fb => fb.id === id);
+  const handleEdit = (_id: string) => {
+    const selectedFeedback = studentFeedbacks.find(fb => fb._id === _id);
     if (!selectedFeedback) return;
 
-    setEditId(id);
-    setFeedback(selectedFeedback);
-    setEditShow(true)
-    console.log('Edit feedback', id)
+    setEditId(_id);
+    setCommentText(selectedFeedback.comment);
+    setEditShow(true);
   }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFeedback((prevData) => ({
-      ...prevData,
-      id: `${studentFeedbacks.length + 1}`,
-      name: `Feedback ${studentFeedbacks.length + 1}`,
-      [name]: value
-    }))
+    setCommentText(e.target.value);
   }
 
   const handleClose = () => {
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-    setShow(false)
+    setCommentText('');
+    setShow(false);
   };
 
-  const handleEditSubmit = (e: FormEvent) => {
+  const handleEditSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setStudentFeedbacks(prev => prev.map(fb => 
-      fb.id === editId ? {...fb, comment: feedback.comment} : fb
-    ));
-
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-    setEditShow(false);
+    if (!editId) return;
+    const res = await fetch(`/api/comments/${editId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+      body: JSON.stringify({ comment: commentText }),
+    });
+    if (res.ok) {
+      const updated: Feedback = await res.json();
+      setStudentFeedbacks(prev => prev.map(fb => fb._id === editId ? updated : fb));
+      setCommentText('');
+      setEditShow(false);
+    }
   }
 
   const handleEditClose = () => {
-    setFeedback(prev => ({
-      ...prev,
-      comment: ''
-    }));
-    setEditShow(false)
+    setCommentText('');
+    setEditShow(false);
   };
 
   const navigate = useNavigate()
@@ -148,15 +134,18 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
 
           {isTeacher ? (
             <div className={styles.feedbackList}>
-              {sampleStudents.map((s) => (
-                <Card key={s.id} className={`mb-3 ${styles.feedbackCard}`}>
+              {studentFeedbacks.length === 0 && (
+                <p className="text-muted">No feedback submitted yet.</p>
+              )}
+              {studentFeedbacks.map((s) => (
+                <Card key={s._id} className={`mb-3 ${styles.feedbackCard}`}>
                   <Card.Body>
                     <Row className="align-items-start">
                       <Col xs="auto">
-                        <div className={styles.cardIcon}>{s.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+                        <div className={styles.cardIcon}>A</div>
                       </Col>
                       <Col>
-                        <div className={styles.cardTitle}>{s.name}</div>
+                        <div className={styles.cardTitle}>Anonymous Student</div>
                         <div className={styles.cardSubtitle}>{s.comment}</div>
                       </Col>
                     </Row>
@@ -170,17 +159,17 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
             </div>
           ) : (
             <div className={styles.feedbackList}>
-              {studentFeedbacks.map((s) => (
-                <Card className={`${styles.feedbackCard}`}>
+              {studentFeedbacks.map((s, i) => (
+                <Card key={s._id} className={`${styles.feedbackCard}`}>
                   <Card.Body>
                     <div className="d-flex align-items-start justify-content-between">
                       <div>
-                        <div className={styles.cardTitle}>{s.name}</div>
+                        <div className={styles.cardTitle}>{`Feedback ${i + 1}`}</div>
                         <div className={styles.cardSubtitle}>{s.comment}</div>
                       </div>
 
                       <div>
-                        <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s.id)} aria-label="Edit">
+                        <Button variant="link" className={styles.editButton} onClick={() => handleEdit(s._id)} aria-label="Edit">
                           ✏️
                         </Button>
                       </div>
@@ -206,7 +195,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         <Modal.Body>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Label>What did you think of this lesson?</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required/>
+            <Form.Control as="textarea" rows={3} name="comment" value={commentText} onChange={handleChange} required/>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -229,7 +218,7 @@ const LessonFeedbackPage: React.FC<Props> = ({ mode, lessonTitle }) => {
         <Modal.Body>
           <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
             <Form.Label>Edit your feedback</Form.Label>
-            <Form.Control as="textarea" rows={3} name="comment" value={feedback.comment} onChange={handleChange} required></Form.Control>
+            <Form.Control as="textarea" rows={3} name="comment" value={commentText} onChange={handleChange} required></Form.Control>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

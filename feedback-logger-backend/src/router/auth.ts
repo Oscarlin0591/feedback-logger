@@ -6,6 +6,23 @@ import Professor from '../model/Professor';
 
 export const JWT_SECRET = process.env.JWT_SECRET!;
 
+interface StudentProfile {
+    name?: string;
+    email?: string;
+    major?: string;
+    department?: string;
+    classYear?: number;
+    profileImage?: string;
+}
+
+interface ProfessorProfile {
+    name?: string;
+    email?: string;
+    major?: string;
+    department?: string;
+    profileImage?: string;
+}
+
 // Named strategies backed by passport-local-mongoose, keyed on email
 passport.use('student', (Student as any).createStrategy());
 passport.use('professor', (Professor as any).createStrategy());
@@ -79,7 +96,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 });
 
 // GET /my-courses — returns courses for the logged-in student or professor
-authRouter.get('/my-courses', authenticate, async (req: AuthRequest, res: Response) => {
+authRouter.get('/courses', authenticate, async (req: AuthRequest, res: Response) => {
     const { id, role } = req.user!;
     const Model: any = role === 'professor' ? Professor : Student;
     const user = await Model.findById(id)
@@ -107,6 +124,45 @@ authRouter.post('/change-password', authenticate, async (req: AuthRequest, res: 
     await user.setPassword(newPassword);
     await user.save();
     res.json({ message: 'Password changed successfully' });
+});
+
+// GET /user — returns current user's profile fields from the database
+authRouter.get('/user', authenticate, async (req: AuthRequest, res: Response) => {
+    const { id, role } = req.user!;
+    const Model: any = role === 'professor' ? Professor : Student;
+    const user = await Model.findById(id, 'name email major department classYear profileImage').lean();
+    if (!user) { res.status(404).json({ message: 'User not found' }); return; }
+    res.json({ ...user, role });
+});
+
+// PUT /user — updates editable profile fields for the logged-in user
+authRouter.put('/user', authenticate, async (req: AuthRequest, res: Response) => {
+    const { id, role } = req.user!;
+    const Model: any = role === 'professor' ? Professor : Student;
+
+    const update: Record<string, unknown> = {};
+
+    if (role === 'professor') {
+        const { name, email, major, department, profileImage } = req.body as ProfessorProfile;
+        if (name !== undefined) update.name = name;
+        if (email !== undefined) update.email = email;
+        if (major !== undefined) update.major = major;
+        if (department !== undefined) update.department = department;
+        if (profileImage !== undefined) update.profileImage = profileImage;
+    } else {
+        const { name, email, major, department, classYear, profileImage } = req.body as StudentProfile;
+        if (name !== undefined) update.name = name;
+        if (email !== undefined) update.email = email;
+        if (major !== undefined) update.major = major;
+        if (department !== undefined) update.department = department;
+        if (classYear !== undefined) update.classYear = classYear;
+        if (profileImage !== undefined) update.profileImage = profileImage;
+    }
+
+    const updated = await Model.findByIdAndUpdate(id, update, { new: true, select: 'name email major department classYear profileImage' }).lean();
+    if (!updated) { res.status(404).json({ message: 'User not found' }); return; }
+
+    res.json({ ...updated, role });
 });
 
 export default authRouter;

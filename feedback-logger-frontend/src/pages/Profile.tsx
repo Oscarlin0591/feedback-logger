@@ -14,19 +14,7 @@ interface User {
     profileImage: string
 }
 
-// Decode the JWT payload without a library (base64 decode the middle segment)
-function decodeToken(token: string): Partial<User> | null {
-    try {
-        const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        return decoded as Partial<User>;
-    } catch {
-        return null;
-    }
-}
-
 export default function Profile() {
-    const [profileImage, setProfileImage] = useState<string>(defaultImage);
     const [user, setUser] = useState<User>()
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<User | null>(null);
@@ -35,32 +23,34 @@ export default function Profile() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const payload = decodeToken(token);
-        if (!payload) return;
-
-        const baseUser: User = {
-            name: payload.name ?? '',
-            email: payload.email ?? '',
-            role: payload.role ?? '',
-            classYear: null,
-            major: '',
-            department: '',
-            profileImage: defaultImage,
-        };
-
-        setUser(baseUser);
-        setEditForm(baseUser);
+        fetch('/api/auth/user', { headers: { Authorization: `Bearer ${token}` } })
+            .then((r) => r.json())
+            .then((data: User) => {
+                const loaded: User = {
+                    name: data.name ?? '',
+                    email: data.email ?? '',
+                    role: data.role ?? '',
+                    classYear: data.classYear ?? null,
+                    major: data.major ?? '',
+                    department: data.department ?? '',
+                    profileImage: data.profileImage || defaultImage,
+                };
+                setUser(loaded);
+                setEditForm(loaded);
+            });
     }, []);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileImage(String(reader.result));
-            };
-            reader.readAsDataURL(file);
-        }
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const dataUrl = String(reader.result);
+            setEditForm((f) => f ? { ...f, profileImage: dataUrl } : f);
+            setUser((u) => u ? { ...u, profileImage: dataUrl } : u);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,8 +61,17 @@ export default function Profile() {
 
     const saveChanges = () => {
         if (!editForm) return;
-        setUser(editForm);
-        setIsEditing(false);
+        const token = localStorage.getItem('token');
+        fetch('/api/auth/user', {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(editForm),
+        })
+            .then((r) => r.json())
+            .then((data: User) => {
+                setUser({ ...data, profileImage: data.profileImage || defaultImage });
+                setIsEditing(false);
+            });
     };
 
     return (
@@ -172,7 +171,7 @@ export default function Profile() {
                         <Col lg={6} className="text-center">
                             <div className="d-flex flex-column align-items-center">
                                 <Image
-                                    src={profileImage || defaultImage}
+                                    src={user?.profileImage || defaultImage}
                                     roundedCircle
                                     fluid
                                     className="shadow-sm mb-3"
